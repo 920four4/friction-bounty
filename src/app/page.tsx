@@ -65,19 +65,19 @@ export default function Home() {
             Change that with a simple feedback widget and automatic rewards.
           </p>
           <div className="flex flex-wrap gap-4">
-            <Link 
+            <a 
               href="/admin" 
-              className="inline-block px-8 py-4 font-mono font-bold uppercase bg-black text-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all"
-              style={{ color: 'white', backgroundColor: 'black' }}
+              className="inline-block px-8 py-4 font-mono font-bold uppercase border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              style={{ color: '#ffffff', backgroundColor: '#000000' }}
             >
-              Open Admin →
-            </Link>
+              <span style={{ color: '#ffffff' }}>Open Admin →</span>
+            </a>
             <a 
               href="#how-it-works" 
-              className="inline-block px-8 py-4 font-mono font-bold uppercase bg-white text-black border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all"
-              style={{ color: 'black', backgroundColor: 'white' }}
+              className="inline-block px-8 py-4 font-mono font-bold uppercase border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              style={{ color: '#000000', backgroundColor: '#ffffff' }}
             >
-              How It Works
+              <span style={{ color: '#000000' }}>How It Works</span>
             </a>
           </div>
         </div>
