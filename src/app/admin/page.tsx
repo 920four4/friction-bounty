@@ -1,11 +1,15 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getDb } from "@/db";
 import { submissions } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { desc } from "drizzle-orm";
+import { requireAuth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
+  // Require authentication
+  await requireAuth();
   // Fetch submissions
   const db = getDb();
   const allSubmissions = await db.query.submissions.findMany({
@@ -50,6 +54,11 @@ export default async function AdminPage() {
               <Link href="/admin/settings" className="brutal-btn text-sm">
                 Settings
               </Link>
+              <form action="/api/admin/logout" method="POST">
+                <button type="submit" className="brutal-box px-4 py-2 font-mono text-sm uppercase hover:bg-gray-100">
+                  Logout
+                </button>
+              </form>
             </div>
           </div>
         </div>

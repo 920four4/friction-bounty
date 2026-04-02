@@ -4,6 +4,7 @@ import { submissions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { approveSubmission, rejectSubmission } from "./actions";
+import { requireAuth } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,9 @@ interface Props {
 }
 
 export default async function SubmissionDetailPage({ params }: Props) {
+  // Require authentication
+  await requireAuth();
+  
   const { id } = await params;
   
   const db = getDb();

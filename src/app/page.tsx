@@ -7,21 +7,9 @@ const BugIcon = () => (
   </svg>
 );
 
-const WaveIcon = () => (
+const EyeOffIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M2 14c.8.6 1.4 1 2.4 1 1.3 0 2-.7 2-1.4 0-1.4-1.3-2-2.8-2.8-1.6-.9-2.8-1.6-2.8-3.2 0-1.7 1.3-2.8 2.9-2.8.9 0 1.6.3 2.3.8"/><path d="M10 14c.8.6 1.4 1 2.4 1 1.3 0 2-.7 2-1.4 0-1.4-1.3-2-2.8-2.8-1.6-.9-2.8-1.6-2.8-3.2 0-1.7 1.3-2.8 2.9-2.8.9 0 1.6.3 2.3.8"/><path d="M18 14c.8.6 1.4 1 2.4 1 1.3 0 2-.7 2-1.4 0-1.4-1.3-2-2.8-2.8-1.6-.9-2.8-1.6-2.8-3.2 0-1.7 1.3-2.8 2.9-2.8.9 0 1.6.3 2.3.8"/>
-  </svg>
-);
-
-const WidgetIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h.01"/><path d="M17 7h.01"/><path d="M7 17h.01"/><path d="M17 17h.01"/>
-  </svg>
-);
-
-const FormIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+    <path d="M10.733 5.076a10.744 10.744 0 0 1 11.3 4.804 1 1 0 0 1 0 .996 10.7 10.7 0 0 1-2.348 3.182"/><path d="M14.5 14.5a4 4 0 0 1-5.3 0"/><path d="M17 17l-4-4"/><path d="m2 2 20 20"/>
   </svg>
 );
 
@@ -64,37 +52,21 @@ export default function Home() {
             Your users find bugs. Most never tell you—they just leave. 
             Change that with a simple feedback widget and automatic rewards.
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, auto))', gap: '16px' }}>
+          
+          {/* Buttons - using table layout for perfect alignment */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link 
+              href="/admin"
+              className="brutal-box bg-black text-white px-8 py-4 font-mono font-bold uppercase text-center"
+            >
+              Open Admin →
+            </Link>
             <a 
               href="#how-it-works"
-              className="px-8 py-4 text-center font-bold uppercase border-2 border-black"
-              style={{ 
-                color: '#000000', 
-                backgroundColor: '#ffffff',
-                boxShadow: '4px 4px 0px 0px #000000',
-                fontFamily: 'system-ui, -apple-system, sans-serif',
-                fontSize: '14px',
-                letterSpacing: '0.05em',
-                textDecoration: 'none'
-              }}
+              className="brutal-box bg-white text-black px-8 py-4 font-mono font-bold uppercase text-center"
             >
               How It Works
             </a>
-            <Link 
-              href="/admin"
-              className="px-8 py-4 text-center font-bold uppercase border-2 border-black"
-              style={{ 
-                color: '#ffffff', 
-                backgroundColor: '#000000',
-                boxShadow: '4px 4px 0px 0px #000000',
-                fontFamily: 'system-ui, -apple-system, sans-serif',
-                fontSize: '14px',
-                letterSpacing: '0.05em',
-                textDecoration: 'none'
-              }}
-            >
-              Open Admin
-            </Link>
           </div>
         </div>
       </section>
@@ -118,7 +90,7 @@ export default function Home() {
             </div>
             <div className="brutal-box p-8">
               <div className="brutal-box-sm bg-yellow-300 w-12 h-12 flex items-center justify-center mb-4 text-black">
-                <WaveIcon />
+                <EyeOffIcon />
               </div>
               <h3 className="font-mono font-bold text-lg uppercase mb-3">You Never Know</h3>
               <p className="text-gray-700 leading-relaxed">
@@ -268,7 +240,7 @@ export default function Home() {
             </p>
             <Link 
               href="/admin" 
-              className="brutal-box bg-yellow-300 text-black px-8 py-4 font-mono font-bold uppercase hover:bg-yellow-400 transition-all inline-block no-underline"
+              className="brutal-box bg-yellow-300 text-black px-8 py-4 font-mono font-bold uppercase hover:bg-yellow-400 transition-colors inline-block"
             >
               Open Admin Dashboard →
             </Link>
