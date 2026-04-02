@@ -7,9 +7,9 @@ const BugIcon = () => (
   </svg>
 );
 
-const EyeOffIcon = () => (
+const GhostIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M10.733 5.076a10.744 10.744 0 0 1 11.3 4.804 1 1 0 0 1 0 .996 10.7 10.7 0 0 1-2.348 3.182"/><path d="M14.5 14.5a4 4 0 0 1-5.3 0"/><path d="M17 17l-4-4"/><path d="m2 2 20 20"/>
+    <path d="M9 10h.01"/><path d="M15 10h.01"/><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 18l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/>
   </svg>
 );
 
@@ -90,7 +90,7 @@ export default function Home() {
             </div>
             <div className="brutal-box p-8">
               <div className="brutal-box-sm bg-yellow-300 w-12 h-12 flex items-center justify-center mb-4 text-black">
-                <EyeOffIcon />
+                <GhostIcon />
               </div>
               <h3 className="font-mono font-bold text-lg uppercase mb-3">You Never Know</h3>
               <p className="text-gray-700 leading-relaxed">
