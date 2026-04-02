@@ -10,16 +10,40 @@ export const dynamic = "force-dynamic";
 export default async function AdminPage() {
   // Require authentication
   await requireAuth();
-  // Fetch submissions
-  const db = getDb();
-  const allSubmissions = await db.query.submissions.findMany({
-    orderBy: [desc(submissions.createdAt)],
-    limit: 50,
-  });
+  
+  // Fetch submissions with error handling
+  let allSubmissions: any[] = [];
+  let dbError = null;
+  
+  try {
+    const db = getDb();
+    allSubmissions = await db.query.submissions.findMany({
+      orderBy: [desc(submissions.createdAt)],
+      limit: 50,
+    });
+  } catch (err) {
+    dbError = err instanceof Error ? err.message : 'Database error';
+    console.error('Admin page DB error:', err);
+  }
 
   const pendingCount = allSubmissions.filter(s => s.status === "pending").length;
   const approvedCount = allSubmissions.filter(s => s.status === "approved").length;
   const rewardedCount = allSubmissions.filter(s => s.status === "rewarded").length;
+  
+  if (dbError) {
+    return (
+      <main className="min-h-screen bg-white">
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          <div className="brutal-box p-8 border-red-500">
+            <h1 className="text-2xl font-bold font-mono uppercase mb-4 text-red-600">Database Error</h1>
+            <p className="font-mono text-sm mb-4">Could not connect to database:</p>
+            <code className="block bg-gray-100 p-4 font-mono text-sm">{dbError}</code>
+            <p className="mt-4 text-sm text-gray-600">Check your DATABASE_URL environment variable.</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   const getStatusBadge = (status: string) => {
     switch (status) {
