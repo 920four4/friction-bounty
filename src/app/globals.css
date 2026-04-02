@@ -51,6 +51,12 @@ body {
   box-shadow: 4px 4px 0px 0px #000000;
 }
 
+.brutal-box-white {
+  border: 2px solid #000000;
+  background-color: #FFFFFF;
+  box-shadow: 4px 4px 0px 0px #000000;
+}
+
 .brutal-btn {
   border: 2px solid #000000;
   background-color: #FFFFFF;
