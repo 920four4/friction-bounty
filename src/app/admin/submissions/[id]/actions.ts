@@ -1,14 +1,14 @@
 "use server";
 
-import { db } from "@/db";
-import { submissions } from "@/db/schema";
+import { db } from "../../../../db";
+import { submissions } from "../../../../db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-02-24.acacia",
+  apiVersion: "2026-03-25.dahlia",
 });
 
 export async function approveSubmission(formData: FormData) {
@@ -164,13 +164,12 @@ async function createDiscountCode(
 
   // Create promotion code
   const promotionCode = await stripe.promotionCodes.create({
-    coupon: coupon.id,
     code: code,
     expires_at: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // 30 days
     metadata: {
       bounty_submission_id: submission.id,
     },
-  });
+  } as any);
 
   // TODO: Send email with discount code
 
