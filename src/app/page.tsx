@@ -67,13 +67,15 @@ export default function Home() {
           <div className="flex flex-wrap gap-4">
             <Link 
               href="/admin" 
-              className="brutal-box bg-black text-white px-8 py-4 font-mono font-bold uppercase hover:bg-gray-800 transition-all inline-block no-underline"
+              className="inline-block px-8 py-4 font-mono font-bold uppercase bg-black text-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all"
+              style={{ color: 'white', backgroundColor: 'black' }}
             >
               Open Admin →
             </Link>
             <a 
               href="#how-it-works" 
-              className="brutal-box bg-white text-black px-8 py-4 font-mono font-bold uppercase hover:bg-gray-50 transition-all inline-block no-underline"
+              className="inline-block px-8 py-4 font-mono font-bold uppercase bg-white text-black border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all"
+              style={{ color: 'black', backgroundColor: 'white' }}
             >
               How It Works
             </a>
