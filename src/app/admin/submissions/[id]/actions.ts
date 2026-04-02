@@ -7,9 +7,20 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-03-25.dahlia",
-});
+let stripe: Stripe | null = null;
+
+function getStripe() {
+  if (!stripe) {
+    const apiKey = process.env.STRIPE_SECRET_KEY;
+    if (!apiKey) {
+      throw new Error("STRIPE_SECRET_KEY environment variable is not set");
+    }
+    stripe = new Stripe(apiKey, {
+      apiVersion: "2026-03-25.dahlia",
+    });
+  }
+  return stripe;
+}
 
 export async function approveSubmission(formData: FormData) {
   const id = formData.get("id") as string;
@@ -96,6 +107,8 @@ async function deliverReward(submission: typeof submissions.$inferSelect) {
   // Try to find or create Stripe customer
   let customerId = submission.stripeCustomerId;
   
+  const stripe = getStripe();
+
   if (!customerId && submission.email) {
     // Search for existing customer by email
     const customers = await stripe.customers.list({
@@ -151,6 +164,8 @@ async function createDiscountCode(
   amount: number, 
   currency: string
 ) {
+  const stripe = getStripe();
+
   // Create coupon
   const coupon = await stripe.coupons.create({
     amount_off: amount,
