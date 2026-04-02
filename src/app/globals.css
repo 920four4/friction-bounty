@@ -36,6 +36,7 @@ body {
 .brutal-box {
   border: 2px solid #000000;
   background-color: #FFFFFF;
+  color: #000000;
   box-shadow: 4px 4px 0px 0px #000000;
 }
 
@@ -60,6 +61,7 @@ body {
 .brutal-btn {
   border: 2px solid #000000;
   background-color: #FFFFFF;
+  color: #000000;
   padding: 0.5rem 1rem;
   font-weight: 500;
   transition: all 0.15s ease;

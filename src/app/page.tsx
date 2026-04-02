@@ -47,19 +47,21 @@ export default function Home() {
             Change that with a simple feedback widget and automatic rewards.
           </p>
           
-          {/* Buttons - using table layout for perfect alignment */}
+          {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
             <Link 
               href="/admin"
-              className="brutal-box bg-black text-white px-8 py-4 font-mono font-bold uppercase text-center"
+              className="px-8 py-4 font-mono font-bold uppercase text-center border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              style={{ color: '#ffffff', backgroundColor: '#000000' }}
             >
-              Open Admin →
+              OPEN ADMIN →
             </Link>
             <a 
               href="#how-it-works"
-              className="brutal-box bg-white text-black px-8 py-4 font-mono font-bold uppercase text-center"
+              className="px-8 py-4 font-mono font-bold uppercase text-center border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              style={{ color: '#000000', backgroundColor: '#ffffff' }}
             >
-              How It Works
+              HOW IT WORKS
             </a>
           </div>
         </div>
@@ -234,9 +236,10 @@ export default function Home() {
             </p>
             <Link 
               href="/admin" 
-              className="brutal-box bg-yellow-300 text-black px-8 py-4 font-mono font-bold uppercase hover:bg-yellow-400 transition-colors inline-block"
+              className="px-8 py-4 font-mono font-bold uppercase inline-block border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+              style={{ color: '#000000', backgroundColor: '#FFE100' }}
             >
-              Open Admin Dashboard →
+              OPEN ADMIN DASHBOARD →
             </Link>
           </div>
         </div>

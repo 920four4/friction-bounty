@@ -70,9 +70,10 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="brutal-box bg-black text-white w-full py-4 font-mono font-bold uppercase disabled:opacity-50"
+            className="w-full py-4 font-mono font-bold uppercase border-2 border-black bg-black text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50"
+            style={{ color: '#ffffff', backgroundColor: '#000000' }}
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Logging in..." : "LOGIN"}
           </button>
         </form>
 
