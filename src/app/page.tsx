@@ -65,8 +65,8 @@ export default function Home() {
             Change that with a simple feedback widget and automatic rewards.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, auto))', gap: '16px' }}>
-            <button 
-              onClick={() => window.location.href='/admin'}
+            <Link 
+              href="/admin"
               className="px-8 py-4 text-center font-bold uppercase border-2 border-black"
               style={{ 
                 color: '#ffffff', 
@@ -75,13 +75,13 @@ export default function Home() {
                 fontFamily: 'system-ui, -apple-system, sans-serif',
                 fontSize: '14px',
                 letterSpacing: '0.05em',
-                cursor: 'pointer'
+                textDecoration: 'none'
               }}
             >
               Open Admin
-            </button>
-            <button 
-              onClick={() => window.location.href='#how-it-works'}
+            </Link>
+            <a 
+              href="#how-it-works"
               className="px-8 py-4 text-center font-bold uppercase border-2 border-black"
               style={{ 
                 color: '#000000', 
@@ -90,11 +90,11 @@ export default function Home() {
                 fontFamily: 'system-ui, -apple-system, sans-serif',
                 fontSize: '14px',
                 letterSpacing: '0.05em',
-                cursor: 'pointer'
+                textDecoration: 'none'
               }}
             >
               How It Works
-            </button>
+            </a>
           </div>
         </div>
       </section>
