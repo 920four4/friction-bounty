@@ -23,22 +23,22 @@ export default async function AdminPage() {
       case "approved":
         return <span className="brutal-badge-blue">Approved</span>;
       case "rewarded":
-        return <span className="inline-block border border-brutal-black bg-brutal-accent-green text-white px-2 py-0.5 text-xs font-mono uppercase">Rewarded</span>;
+        return <span className="inline-block border border-black bg-green-500 text-white px-2 py-0.5 text-xs font-mono uppercase">Rewarded</span>;
       case "rejected":
-        return <span className="inline-block border border-brutal-black bg-brutal-gray-400 text-white px-2 py-0.5 text-xs font-mono uppercase">Rejected</span>;
+        return <span className="inline-block border border-black bg-gray-400 text-white px-2 py-0.5 text-xs font-mono uppercase">Rejected</span>;
       default:
         return <span className="brutal-badge">{status}</span>;
     }
   };
 
   return (
-    <main className="min-h-screen bg-brutal-white">
+    <main className="min-h-screen bg-white">
       {/* Header */}
-      <header className="border-b-2 border-brutal-black bg-brutal-white">
+      <header className="border-b-2 border-black bg-white">
         <div className="max-w-7xl mx-auto px-4 py-6 md:px-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <Link href="/" className="text-brutal-gray-500 hover:text-brutal-black font-mono text-sm">
+              <Link href="/" className="text-gray-500 hover:text-black font-mono text-sm">
                 ← Back to Home
               </Link>
               <h1 className="text-3xl md:text-4xl font-bold font-mono uppercase mt-2">
@@ -55,23 +55,23 @@ export default async function AdminPage() {
       </header>
 
       {/* Stats Bar */}
-      <div className="border-b-2 border-brutal-black bg-brutal-gray-100">
+      <div className="border-b-2 border-black bg-gray-100">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex flex-wrap gap-8 py-4">
             <div>
-              <p className="font-mono text-xs uppercase text-brutal-gray-500">Pending Review</p>
+              <p className="font-mono text-xs uppercase text-gray-500">Pending Review</p>
               <p className="text-2xl font-bold font-mono">{pendingCount}</p>
             </div>
             <div>
-              <p className="font-mono text-xs uppercase text-brutal-gray-500">Approved</p>
+              <p className="font-mono text-xs uppercase text-gray-500">Approved</p>
               <p className="text-2xl font-bold font-mono">{approvedCount}</p>
             </div>
             <div>
-              <p className="font-mono text-xs uppercase text-brutal-gray-500">Rewarded</p>
+              <p className="font-mono text-xs uppercase text-gray-500">Rewarded</p>
               <p className="text-2xl font-bold font-mono">{rewardedCount}</p>
             </div>
             <div>
-              <p className="font-mono text-xs uppercase text-brutal-gray-500">Total</p>
+              <p className="font-mono text-xs uppercase text-gray-500">Total</p>
               <p className="text-2xl font-bold font-mono">{allSubmissions.length}</p>
             </div>
           </div>
@@ -83,23 +83,23 @@ export default async function AdminPage() {
         {allSubmissions.length === 0 ? (
           <div className="brutal-box p-12 text-center">
             <p className="font-mono text-lg mb-2">No submissions yet</p>
-            <p className="text-brutal-gray-500">When users submit bug reports, they will appear here.</p>
+            <p className="text-gray-500">When users submit bug reports, they will appear here.</p>
           </div>
         ) : (
           <div className="space-y-4">
             {allSubmissions.map((submission) => (
               <div 
                 key={submission.id} 
-                className="brutal-box p-4 md:p-6 hover:bg-brutal-gray-50 transition-colors"
+                className="brutal-box p-4 md:p-6 hover:bg-gray-50 transition-colors"
               >
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                       {getStatusBadge(submission.status)}
-                      <span className="font-mono text-xs text-brutal-gray-500">
+                      <span className="font-mono text-xs text-gray-500">
                         {submission.issueType}
                       </span>
-                      <span className="font-mono text-xs text-brutal-gray-400">
+                      <span className="font-mono text-xs text-gray-400">
                         ${submission.bountyAmount}
                       </span>
                     </div>
@@ -108,11 +108,11 @@ export default async function AdminPage() {
                       {submission.title}
                     </h3>
                     
-                    <p className="text-brutal-gray-600 text-sm mb-3 line-clamp-2">
+                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                       {submission.description}
                     </p>
                     
-                    <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-brutal-gray-500">
+                    <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-gray-500">
                       <span>{submission.email}</span>
                       <span>{submission.pageUrl}</span>
                       <span>{new Date(submission.createdAt).toLocaleDateString()}</span>

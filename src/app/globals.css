@@ -1,12 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* Import fonts */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Neo-brutalist color system */
   --brutal-black: #000000;
   --brutal-white: #FFFFFF;
   --brutal-yellow: #FFE100;
@@ -30,102 +27,141 @@ html {
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
-  background-color: var(--brutal-white);
-  color: var(--brutal-black);
+  background-color: #FFFFFF;
+  color: #000000;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* Neo-brutalist utility classes */
-@layer components {
-  .brutal-box {
-    @apply border-2 border-brutal-black bg-brutal-white;
-    box-shadow: 4px 4px 0px 0px #000000;
-  }
+.brutal-box {
+  border: 2px solid #000000;
+  background-color: #FFFFFF;
+  box-shadow: 4px 4px 0px 0px #000000;
+}
 
-  .brutal-box-sm {
-    @apply border-2 border-brutal-black bg-brutal-white;
-    box-shadow: 2px 2px 0px 0px #000000;
-  }
+.brutal-box-sm {
+  border: 2px solid #000000;
+  background-color: #FFFFFF;
+  box-shadow: 2px 2px 0px 0px #000000;
+}
 
-  .brutal-box-yellow {
-    @apply border-2 border-brutal-black bg-brutal-accent-yellow;
-    box-shadow: 4px 4px 0px 0px #000000;
-  }
+.brutal-box-yellow {
+  border: 2px solid #000000;
+  background-color: #FFE100;
+  box-shadow: 4px 4px 0px 0px #000000;
+}
 
-  .brutal-btn {
-    @apply border-2 border-brutal-black bg-brutal-white px-4 py-2 font-medium transition-all;
-    box-shadow: 4px 4px 0px 0px #000000;
-  }
+.brutal-btn {
+  border: 2px solid #000000;
+  background-color: #FFFFFF;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  box-shadow: 4px 4px 0px 0px #000000;
+}
 
-  .brutal-btn:hover {
-    @apply bg-brutal-accent-yellow;
-    box-shadow: 6px 6px 0px 0px #000000;
-    transform: translate(-2px, -2px);
-  }
+.brutal-btn:hover {
+  background-color: #FFE100;
+  box-shadow: 6px 6px 0px 0px #000000;
+  transform: translate(-2px, -2px);
+}
 
-  .brutal-btn:active {
-    box-shadow: 0px 0px 0px 0px #000000;
-    transform: translate(4px, 4px);
-  }
+.brutal-btn:active {
+  box-shadow: 0px 0px 0px 0px #000000;
+  transform: translate(4px, 4px);
+}
 
-  .brutal-btn-black {
-    @apply border-2 border-brutal-black bg-brutal-black text-brutal-white px-4 py-2 font-medium transition-all;
-    box-shadow: 4px 4px 0px 0px #000000;
-  }
+.brutal-btn-black {
+  border: 2px solid #000000;
+  background-color: #000000;
+  color: #FFFFFF;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: all 0.15s ease;
+  box-shadow: 4px 4px 0px 0px #000000;
+}
 
-  .brutal-btn-black:hover {
-    @apply bg-brutal-gray-800;
-    box-shadow: 6px 6px 0px 0px #000000;
-    transform: translate(-2px, -2px);
-  }
+.brutal-btn-black:hover {
+  background-color: #262626;
+  box-shadow: 6px 6px 0px 0px #000000;
+  transform: translate(-2px, -2px);
+}
 
-  .brutal-btn-black:active {
-    box-shadow: 0px 0px 0px 0px #000000;
-    transform: translate(4px, 4px);
-  }
+.brutal-btn-black:active {
+  box-shadow: 0px 0px 0px 0px #000000;
+  transform: translate(4px, 4px);
+}
 
-  .brutal-input {
-    @apply border-2 border-brutal-black bg-brutal-white px-3 py-2 w-full outline-none;
-    box-shadow: 2px 2px 0px 0px #000000;
-  }
+.brutal-input {
+  border: 2px solid #000000;
+  background-color: #FFFFFF;
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+  outline: none;
+  box-shadow: 2px 2px 0px 0px #000000;
+}
 
-  .brutal-input:focus {
-    @apply bg-brutal-accent-yellow;
-    box-shadow: 4px 4px 0px 0px #000000;
-  }
+.brutal-input:focus {
+  background-color: #FFE100;
+  box-shadow: 4px 4px 0px 0px #000000;
+}
 
-  .brutal-label {
-    @apply block font-mono text-sm font-medium mb-1 uppercase tracking-wide;
-  }
+.brutal-label {
+  display: block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: #525252;
+}
 
-  .brutal-badge {
-    @apply inline-block border border-brutal-black px-2 py-0.5 text-xs font-mono uppercase;
-  }
+.brutal-badge {
+  display: inline-block;
+  border: 1px solid #000000;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+}
 
-  .brutal-badge-yellow {
-    @apply inline-block border border-brutal-black bg-brutal-accent-yellow px-2 py-0.5 text-xs font-mono uppercase;
-  }
+.brutal-badge-yellow {
+  display: inline-block;
+  border: 1px solid #000000;
+  background-color: #FFE100;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+}
 
-  .brutal-badge-blue {
-    @apply inline-block border border-brutal-black bg-brutal-accent-blue text-white px-2 py-0.5 text-xs font-mono uppercase;
-  }
+.brutal-badge-blue {
+  display: inline-block;
+  border: 1px solid #000000;
+  background-color: #0066FF;
+  color: #FFFFFF;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+}
 
-  .brutal-divider {
-    @apply border-t-2 border-brutal-black;
-  }
+.brutal-divider {
+  border-top: 2px solid #000000;
 }
 
 /* Selection styling */
 ::selection {
-  background-color: var(--brutal-accent-yellow);
-  color: var(--brutal-black);
+  background-color: #FFE100;
+  color: #000000;
 }
 
 /* Focus visible styling */
 :focus-visible {
-  outline: 2px solid var(--brutal-black);
+  outline: 2px solid #000000;
   outline-offset: 2px;
 }
 
@@ -136,14 +172,14 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--brutal-gray-100);
-  border-left: 2px solid var(--brutal-black);
+  background: #F5F5F5;
+  border-left: 2px solid #000000;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--brutal-black);
+  background: #000000;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--brutal-gray-600);
+  background: #525252;
 }

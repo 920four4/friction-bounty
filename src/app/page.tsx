@@ -21,12 +21,12 @@ export default function Home() {
         <nav className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-12">
           <Link 
             href="/admin" 
-            className="brutal-box p-6 hover:bg-brutal-accent-yellow transition-colors group"
+            className="brutal-box p-6 hover:bg-yellow-300 transition-colors group"
           >
             <h2 className="font-mono text-lg font-bold uppercase mb-2 group-hover:underline">
               Admin Dashboard
             </h2>
-            <p className="text-brutal-gray-600 text-sm">
+            <p className="text-gray-600 text-sm">
               Review submissions, approve bounties, configure settings
             </p>
           </Link>
@@ -36,7 +36,7 @@ export default function Home() {
               Widget Status
             </h2>
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-brutal-accent-green border border-brutal-black"></span>
+              <span className="w-3 h-3 bg-green-500 border border-black"></span>
               <span className="text-sm font-mono">Operational</span>
             </div>
           </div>
@@ -46,7 +46,7 @@ export default function Home() {
               Submissions
             </h2>
             <p className="text-3xl font-mono font-bold">0</p>
-            <p className="text-brutal-gray-500 text-xs uppercase mt-1">This month</p>
+            <p className="text-gray-500 text-xs uppercase mt-1">This month</p>
           </div>
         </nav>
 
@@ -55,10 +55,10 @@ export default function Home() {
           <h2 className="font-mono text-xl font-bold uppercase mb-6">
             Installation
           </h2>
-          <p className="mb-4 text-brutal-gray-700">
+          <p className="mb-4 text-gray-700">
             Add this script tag to your website to enable the Friction Bounty widget:
           </p>
-          <code className="brutal-box-sm block p-4 font-mono text-sm bg-brutal-gray-100 overflow-x-auto">
+          <code className="brutal-box-sm block p-4 font-mono text-sm bg-gray-100 overflow-x-auto">
             {`<script src="${typeof window !== 'undefined' ? window.location.origin : ''}/widget.js" async></script>`}
           </code>
         </section>
