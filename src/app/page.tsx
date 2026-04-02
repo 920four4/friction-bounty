@@ -24,7 +24,7 @@ export default function Home() {
             </Link>
             <a 
               href="#how-it-works" 
-              className="brutal-box px-8 py-4 font-mono font-bold uppercase hover:bg-yellow-200 transition-colors inline-block"
+              className="brutal-box bg-white px-8 py-4 font-mono font-bold uppercase hover:bg-gray-50 transition-colors inline-block"
             >
               How It Works
             </a>
@@ -40,7 +40,9 @@ export default function Home() {
           </h2>
           <div className="grid md:grid-cols-2 gap-8">
             <div className="brutal-box p-8">
-              <div className="text-4xl mb-4">😤</div>
+              <div className="brutal-box-sm bg-yellow-300 w-12 h-12 flex items-center justify-center text-2xl mb-4">
+                😤
+              </div>
               <h3 className="font-mono font-bold text-lg uppercase mb-3">User Hits a Bug</h3>
               <p className="text-gray-700 leading-relaxed">
                 They're confused. Your support form is buried or requires signup. 
@@ -48,7 +50,9 @@ export default function Home() {
               </p>
             </div>
             <div className="brutal-box p-8">
-              <div className="text-4xl mb-4">👋</div>
+              <div className="brutal-box-sm bg-yellow-300 w-12 h-12 flex items-center justify-center text-2xl mb-4">
+                👋
+              </div>
               <h3 className="font-mono font-bold text-lg uppercase mb-3">You Never Know</h3>
               <p className="text-gray-700 leading-relaxed">
                 The bug stays live. More users hit it. Some churn. 
@@ -106,30 +110,58 @@ export default function Home() {
           
           <div className="grid md:grid-cols-2 gap-6">
             <div className="brutal-box p-6">
-              <h3 className="font-mono font-bold uppercase mb-2">📍 Production Context</h3>
-              <p className="text-gray-700 text-sm">
-                Every report includes exact URL, browser, OS, viewport, and screenshot. 
-                Reproduce issues exactly as users see them.
-              </p>
+              <div className="flex items-start gap-4">
+                <div className="brutal-box-sm bg-red-400 w-12 h-12 flex items-center justify-center text-2xl shrink-0">
+                  📍
+                </div>
+                <div>
+                  <h3 className="font-mono font-bold uppercase mb-2">Production Context</h3>
+                  <p className="text-gray-700 text-sm">
+                    Every report includes exact URL, browser, OS, viewport, and screenshot. 
+                    Reproduce issues exactly as users see them.
+                  </p>
+                </div>
+              </div>
             </div>
             <div className="brutal-box p-6">
-              <h3 className="font-mono font-bold uppercase mb-2">⚡ Automatic Rewards</h3>
-              <p className="text-gray-700 text-sm">
-                Approve a report → Stripe creates customer (if needed) → 
-                account credit applied instantly.
-              </p>
+              <div className="flex items-start gap-4">
+                <div className="brutal-box-sm bg-blue-400 w-12 h-12 flex items-center justify-center text-2xl shrink-0">
+                  ⚡
+                </div>
+                <div>
+                  <h3 className="font-mono font-bold uppercase mb-2">Automatic Rewards</h3>
+                  <p className="text-gray-700 text-sm">
+                    Approve a report → Stripe creates customer (if needed) + 
+                    account credit applied instantly.
+                  </p>
+                </div>
+              </div>
             </div>
             <div className="brutal-box p-6">
-              <h3 className="font-mono font-bold uppercase mb-2">🛡️ Spam Protection</h3>
-              <p className="text-gray-700 text-sm">
-                Max 3 submissions per hour per IP. You review before any credit is awarded.
-              </p>
+              <div className="flex items-start gap-4">
+                <div className="brutal-box-sm bg-red-400 w-12 h-12 flex items-center justify-center text-2xl shrink-0">
+                  🛡️
+                </div>
+                <div>
+                  <h3 className="font-mono font-bold uppercase mb-2">Spam Protection</h3>
+                  <p className="text-gray-700 text-sm">
+                    Max 3 submissions per hour per IP. You review before any credit is awarded.
+                  </p>
+                </div>
+              </div>
             </div>
             <div className="brutal-box p-6">
-              <h3 className="font-mono font-bold uppercase mb-2">💰 Cost Efficient</h3>
-              <p className="text-gray-700 text-sm">
-                A $20 credit bounty beats losing a customer worth hundreds in LTV.
-              </p>
+              <div className="flex items-start gap-4">
+                <div className="brutal-box-sm bg-yellow-300 w-12 h-12 flex items-center justify-center text-2xl shrink-0">
+                  💰
+                </div>
+                <div>
+                  <h3 className="font-mono font-bold uppercase mb-2">Cost Efficient</h3>
+                  <p className="text-gray-700 text-sm">
+                    A $20 credit bounty beats losing a customer worth hundreds in LTV.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
