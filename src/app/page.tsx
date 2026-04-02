@@ -65,21 +65,6 @@ export default function Home() {
             Change that with a simple feedback widget and automatic rewards.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, auto))', gap: '16px' }}>
-            <Link 
-              href="/admin"
-              className="px-8 py-4 text-center font-bold uppercase border-2 border-black"
-              style={{ 
-                color: '#ffffff', 
-                backgroundColor: '#000000',
-                boxShadow: '4px 4px 0px 0px #000000',
-                fontFamily: 'system-ui, -apple-system, sans-serif',
-                fontSize: '14px',
-                letterSpacing: '0.05em',
-                textDecoration: 'none'
-              }}
-            >
-              Open Admin
-            </Link>
             <a 
               href="#how-it-works"
               className="px-8 py-4 text-center font-bold uppercase border-2 border-black"
@@ -95,6 +80,21 @@ export default function Home() {
             >
               How It Works
             </a>
+            <Link 
+              href="/admin"
+              className="px-8 py-4 text-center font-bold uppercase border-2 border-black"
+              style={{ 
+                color: '#ffffff', 
+                backgroundColor: '#000000',
+                boxShadow: '4px 4px 0px 0px #000000',
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+                fontSize: '14px',
+                letterSpacing: '0.05em',
+                textDecoration: 'none'
+              }}
+            >
+              Open Admin
+            </Link>
           </div>
         </div>
       </section>
