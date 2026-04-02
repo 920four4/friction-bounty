@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/db";
-import { submissions, rateLimitLog } from "@/db/schema";
+import { getDb } from "../../../db";
+import { submissions, rateLimitLog } from "../../../db/schema";
 import { z } from "zod";
 import { UAParser } from "ua-parser-js";
 
@@ -23,6 +23,7 @@ const submissionSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    const db = getDb();
     
     // Validate input
     const result = submissionSchema.safeParse(body);

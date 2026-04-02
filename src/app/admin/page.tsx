@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { submissions } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 
@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   // Fetch submissions
+  const db = getDb();
   const allSubmissions = await db.query.submissions.findMany({
     orderBy: [desc(submissions.createdAt)],
     limit: 50,

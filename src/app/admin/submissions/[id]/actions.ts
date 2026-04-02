@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "../../../../db";
+import { getDb } from "../../../../db";
 import { submissions } from "../../../../db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -18,6 +18,8 @@ export async function approveSubmission(formData: FormData) {
     throw new Error("Submission ID required");
   }
 
+  const db = getDb();
+  
   // Fetch submission
   const submission = await db.query.submissions.findFirst({
     where: eq(submissions.id, id),
@@ -72,6 +74,8 @@ export async function rejectSubmission(formData: FormData) {
   if (!id) {
     throw new Error("Submission ID required");
   }
+
+  const db = getDb();
 
   await db.update(submissions)
     .set({ 

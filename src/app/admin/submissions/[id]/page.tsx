@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { db } from "@/db";
+import { getDb } from "../../../../db";
 import { submissions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
@@ -14,6 +14,7 @@ interface Props {
 export default async function SubmissionDetailPage({ params }: Props) {
   const { id } = await params;
   
+  const db = getDb();
   const submission = await db.query.submissions.findFirst({
     where: eq(submissions.id, id),
   });
