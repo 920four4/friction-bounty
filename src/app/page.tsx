@@ -65,34 +65,38 @@ export default function Home() {
             Change that with a simple feedback widget and automatic rewards.
           </p>
           <div className="flex flex-wrap gap-4">
-            <a 
-              href="#how-it-works" 
-              className="inline-block px-8 py-4 min-w-[180px] text-center font-bold uppercase border-2 border-black"
-              style={{ 
-                color: '#000000', 
-                backgroundColor: '#ffffff',
-                boxShadow: '4px 4px 0px 0px #000000',
-                fontFamily: 'system-ui, -apple-system, sans-serif',
-                fontSize: '14px',
-                letterSpacing: '0.05em'
-              }}
-            >
-              How It Works
-            </a>
-            <a 
-              href="/admin" 
-              className="inline-block px-8 py-4 min-w-[180px] text-center font-bold uppercase border-2 border-black"
-              style={{ 
-                color: '#ffffff', 
-                backgroundColor: '#000000',
-                boxShadow: '4px 4px 0px 0px #000000',
-                fontFamily: 'system-ui, -apple-system, sans-serif',
-                fontSize: '14px',
-                letterSpacing: '0.05em'
-              }}
-            >
-              Open Admin
-            </a>
+            <div>
+              <a 
+                href="/admin" 
+                className="inline-block px-8 py-4 min-w-[180px] text-center font-bold uppercase border-2 border-black"
+                style={{ 
+                  color: '#ffffff', 
+                  backgroundColor: '#000000',
+                  boxShadow: '4px 4px 0px 0px #000000',
+                  fontFamily: 'system-ui, -apple-system, sans-serif',
+                  fontSize: '14px',
+                  letterSpacing: '0.05em'
+                }}
+              >
+                Open Admin
+              </a>
+            </div>
+            <div>
+              <a 
+                href="#how-it-works" 
+                className="inline-block px-8 py-4 min-w-[180px] text-center font-bold uppercase border-2 border-black"
+                style={{ 
+                  color: '#000000', 
+                  backgroundColor: '#ffffff',
+                  boxShadow: '4px 4px 0px 0px #000000',
+                  fontFamily: 'system-ui, -apple-system, sans-serif',
+                  fontSize: '14px',
+                  letterSpacing: '0.05em'
+                }}
+              >
+                How It Works
+              </a>
+            </div>
           </div>
         </div>
       </section>
