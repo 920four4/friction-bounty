@@ -1,5 +1,54 @@
 import Link from "next/link";
 
+// SVG Icons
+const BugIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/>
+  </svg>
+);
+
+const WaveIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 14c.8.6 1.4 1 2.4 1 1.3 0 2-.7 2-1.4 0-1.4-1.3-2-2.8-2.8-1.6-.9-2.8-1.6-2.8-3.2 0-1.7 1.3-2.8 2.9-2.8.9 0 1.6.3 2.3.8"/><path d="M10 14c.8.6 1.4 1 2.4 1 1.3 0 2-.7 2-1.4 0-1.4-1.3-2-2.8-2.8-1.6-.9-2.8-1.6-2.8-3.2 0-1.7 1.3-2.8 2.9-2.8.9 0 1.6.3 2.3.8"/><path d="M18 14c.8.6 1.4 1 2.4 1 1.3 0 2-.7 2-1.4 0-1.4-1.3-2-2.8-2.8-1.6-.9-2.8-1.6-2.8-3.2 0-1.7 1.3-2.8 2.9-2.8.9 0 1.6.3 2.3.8"/>
+  </svg>
+);
+
+const WidgetIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h.01"/><path d="M17 7h.01"/><path d="M7 17h.01"/><path d="M17 17h.01"/>
+  </svg>
+);
+
+const FormIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+  </svg>
+);
+
+const ZapIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+  </svg>
+);
+
+const LocationIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+  </svg>
+);
+
+const ShieldIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+  </svg>
+);
+
+const DollarIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+  </svg>
+);
+
 export default function Home() {
   return (
     <main className="min-h-screen">
@@ -18,13 +67,13 @@ export default function Home() {
           <div className="flex flex-wrap gap-4">
             <Link 
               href="/admin" 
-              className="brutal-box bg-black text-white px-8 py-4 font-mono font-bold uppercase hover:bg-gray-800 transition-colors inline-block"
+              className="brutal-box bg-black text-white px-8 py-4 font-mono font-bold uppercase hover:bg-gray-800 transition-all inline-block no-underline"
             >
               Open Admin →
             </Link>
             <a 
               href="#how-it-works" 
-              className="brutal-box bg-white px-8 py-4 font-mono font-bold uppercase hover:bg-gray-50 transition-colors inline-block"
+              className="brutal-box bg-white text-black px-8 py-4 font-mono font-bold uppercase hover:bg-gray-50 transition-all inline-block no-underline"
             >
               How It Works
             </a>
@@ -40,8 +89,8 @@ export default function Home() {
           </h2>
           <div className="grid md:grid-cols-2 gap-8">
             <div className="brutal-box p-8">
-              <div className="brutal-box-sm bg-yellow-300 w-12 h-12 flex items-center justify-center text-2xl mb-4">
-                😤
+              <div className="brutal-box-sm bg-yellow-300 w-12 h-12 flex items-center justify-center mb-4 text-black">
+                <BugIcon />
               </div>
               <h3 className="font-mono font-bold text-lg uppercase mb-3">User Hits a Bug</h3>
               <p className="text-gray-700 leading-relaxed">
@@ -50,8 +99,8 @@ export default function Home() {
               </p>
             </div>
             <div className="brutal-box p-8">
-              <div className="brutal-box-sm bg-yellow-300 w-12 h-12 flex items-center justify-center text-2xl mb-4">
-                👋
+              <div className="brutal-box-sm bg-yellow-300 w-12 h-12 flex items-center justify-center mb-4 text-black">
+                <WaveIcon />
               </div>
               <h3 className="font-mono font-bold text-lg uppercase mb-3">You Never Know</h3>
               <p className="text-gray-700 leading-relaxed">
@@ -111,8 +160,8 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-6">
             <div className="brutal-box p-6">
               <div className="flex items-start gap-4">
-                <div className="brutal-box-sm bg-red-400 w-12 h-12 flex items-center justify-center text-2xl shrink-0">
-                  📍
+                <div className="brutal-box-sm bg-red-400 w-12 h-12 flex items-center justify-center mb-4 text-black shrink-0">
+                  <LocationIcon />
                 </div>
                 <div>
                   <h3 className="font-mono font-bold uppercase mb-2">Production Context</h3>
@@ -125,8 +174,8 @@ export default function Home() {
             </div>
             <div className="brutal-box p-6">
               <div className="flex items-start gap-4">
-                <div className="brutal-box-sm bg-blue-400 w-12 h-12 flex items-center justify-center text-2xl shrink-0">
-                  ⚡
+                <div className="brutal-box-sm bg-blue-400 w-12 h-12 flex items-center justify-center mb-4 text-black shrink-0">
+                  <ZapIcon />
                 </div>
                 <div>
                   <h3 className="font-mono font-bold uppercase mb-2">Automatic Rewards</h3>
@@ -139,8 +188,8 @@ export default function Home() {
             </div>
             <div className="brutal-box p-6">
               <div className="flex items-start gap-4">
-                <div className="brutal-box-sm bg-red-400 w-12 h-12 flex items-center justify-center text-2xl shrink-0">
-                  🛡️
+                <div className="brutal-box-sm bg-red-400 w-12 h-12 flex items-center justify-center mb-4 text-black shrink-0">
+                  <ShieldIcon />
                 </div>
                 <div>
                   <h3 className="font-mono font-bold uppercase mb-2">Spam Protection</h3>
@@ -152,8 +201,8 @@ export default function Home() {
             </div>
             <div className="brutal-box p-6">
               <div className="flex items-start gap-4">
-                <div className="brutal-box-sm bg-yellow-300 w-12 h-12 flex items-center justify-center text-2xl shrink-0">
-                  💰
+                <div className="brutal-box-sm bg-yellow-300 w-12 h-12 flex items-center justify-center mb-4 text-black shrink-0">
+                  <DollarIcon />
                 </div>
                 <div>
                   <h3 className="font-mono font-bold uppercase mb-2">Cost Efficient</h3>
@@ -174,11 +223,11 @@ export default function Home() {
             Installation
           </h2>
           
-          <div className="brutal-box-white p-8">
+          <div className="brutal-box-white p-8 bg-white">
             <p className="mb-6 text-gray-700">
               Add this script to your website, just before the closing <code className="bg-gray-100 px-2 py-1 font-mono text-sm">&lt;/body&gt;</code> tag:
             </p>
-            <code className="brutal-box-sm block p-6 font-mono text-sm bg-gray-900 text-green-400 overflow-x-auto mb-6">
+            <code className="brutal-box-sm block p-6 font-mono text-sm bg-gray-900 text-green-400 overflow-x-auto mb-6 border-2 border-black">
               {`<script src="https://friction-bounty.vercel.app/widget.js" async></script>`}
             </code>
             <p className="text-sm text-gray-600">
@@ -201,7 +250,7 @@ export default function Home() {
             </p>
             <Link 
               href="/admin" 
-              className="brutal-box bg-yellow-300 text-black px-8 py-4 font-mono font-bold uppercase hover:bg-yellow-400 transition-colors inline-block"
+              className="brutal-box bg-yellow-300 text-black px-8 py-4 font-mono font-bold uppercase hover:bg-yellow-400 transition-all inline-block no-underline"
             >
               Open Admin Dashboard →
             </Link>
