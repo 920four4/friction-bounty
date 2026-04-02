@@ -1,7 +1,5 @@
-@import "tailwindcss";
-
-/* Import fonts */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
 
 :root {
   --brutal-black: #000000;
