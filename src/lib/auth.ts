@@ -1,14 +1,23 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
 const AUTH_COOKIE_NAME = "friction_bounty_auth";
-const AUTH_TOKEN = "fb_admin_" + Buffer.from(ADMIN_PASSWORD).toString("base64");
+
+// Lazy load the admin password from env
+function getAdminPassword(): string {
+  return process.env.ADMIN_PASSWORD || "admin123";
+}
+
+// Generate auth token based on current password
+function getAuthToken(): string {
+  const password = getAdminPassword();
+  return "fb_admin_" + Buffer.from(password).toString("base64");
+}
 
 export async function isAuthenticated(): Promise<boolean> {
   const cookieStore = await cookies();
   const authCookie = cookieStore.get(AUTH_COOKIE_NAME);
-  return authCookie?.value === AUTH_TOKEN;
+  return authCookie?.value === getAuthToken();
 }
 
 export async function requireAuth() {
@@ -19,9 +28,9 @@ export async function requireAuth() {
 }
 
 export async function login(password: string): Promise<boolean> {
-  if (password === ADMIN_PASSWORD) {
+  if (password === getAdminPassword()) {
     const cookieStore = await cookies();
-    cookieStore.set(AUTH_COOKIE_NAME, AUTH_TOKEN, {
+    cookieStore.set(AUTH_COOKIE_NAME, getAuthToken(), {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
