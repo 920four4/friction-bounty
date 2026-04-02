@@ -67,17 +67,25 @@ export default function Home() {
           <div className="flex flex-wrap gap-4">
             <a 
               href="/admin" 
-              className="inline-block px-8 py-4 font-mono font-bold uppercase border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-              style={{ color: '#ffffff', backgroundColor: '#000000' }}
+              className="inline-block px-8 py-4 min-w-[180px] text-center font-mono font-bold uppercase border-2 border-black"
+              style={{ 
+                color: '#ffffff', 
+                backgroundColor: '#000000',
+                boxShadow: '4px 4px 0px 0px #000000'
+              }}
             >
-              <span style={{ color: '#ffffff' }}>Open Admin →</span>
+              Open Admin →
             </a>
             <a 
               href="#how-it-works" 
-              className="inline-block px-8 py-4 font-mono font-bold uppercase border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-              style={{ color: '#000000', backgroundColor: '#ffffff' }}
+              className="inline-block px-8 py-4 min-w-[180px] text-center font-mono font-bold uppercase border-2 border-black"
+              style={{ 
+                color: '#000000', 
+                backgroundColor: '#ffffff',
+                boxShadow: '4px 4px 0px 0px #000000'
+              }}
             >
-              <span style={{ color: '#000000' }}>How It Works</span>
+              How It Works
             </a>
           </div>
         </div>
