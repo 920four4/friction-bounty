@@ -5,15 +5,45 @@ import { organizations, submissions } from "@/db/schema";
 
 export const dynamic = "force-dynamic";
 
-export default async function SuperAdminOverview() {
+async function loadData() {
   const db = getDb();
-  const [orgs, recent] = await Promise.all([
+  const [orgs, recent, allSubs] = await Promise.all([
     db.query.organizations.findMany({ orderBy: [desc(organizations.createdAt)] }),
     db.query.submissions.findMany({ orderBy: [desc(submissions.createdAt)], limit: 25 }),
+    db.query.submissions.findMany(),
   ]);
+  return { orgs, recent, allSubs };
+}
+
+export default async function SuperAdminOverview() {
+  let data: Awaited<ReturnType<typeof loadData>> | null = null;
+  let dbError: string | null = null;
+  try {
+    data = await loadData();
+  } catch (err) {
+    dbError = err instanceof Error ? err.message : "Database error";
+  }
+
+  if (dbError || !data) {
+    return (
+      <main className="max-w-3xl mx-auto px-4 md:px-8 py-12">
+        <div className="brutal-box p-8 border-red-500">
+          <h2 className="font-mono font-bold uppercase text-lg mb-3">Database not initialized</h2>
+          <p className="text-sm mb-4">
+            Couldn&rsquo;t read from the database. Most likely the migrations haven&rsquo;t been run yet on this environment.
+          </p>
+          {dbError && <pre className="brutal-box-sm bg-gray-50 p-3 text-xs overflow-x-auto">{dbError}</pre>}
+          <div className="mt-4">
+            <Link href="/migrate" className="brutal-btn-black inline-block">Run migrations →</Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  const { orgs, recent, allSubs } = data;
 
   // Aggregate counts per org
-  const allSubs = await db.query.submissions.findMany();
   const byOrg = new Map<string, { pending: number; rewarded: number; total: number }>();
   for (const s of allSubs) {
     const orgIdKey = String(s.orgId);
