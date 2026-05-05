@@ -72,6 +72,9 @@ export async function approveSubmission(formData: FormData) {
   const id = String(formData.get("id") || "");
   const replyBody = String(formData.get("body") || "").trim();
   const customAmount = String(formData.get("bountyAmount") || "").trim();
+  const rewardTypeRaw = String(formData.get("rewardType") || "stripe_credit");
+  const rewardType: "stripe_credit" | "stripe_coupon" =
+    rewardTypeRaw === "stripe_coupon" ? "stripe_coupon" : "stripe_credit";
   if (!id) throw new Error("Submission ID required");
 
   const { submission, org } = await loadOwnedSubmission(id);
@@ -87,15 +90,21 @@ export async function approveSubmission(formData: FormData) {
       reviewedAt: new Date(),
       reviewedByUserId: user && user.id !== "super" ? user.id : undefined,
       bountyAmount: amountStr,
+      rewardType,
       updatedAt: new Date(),
     })
     .where(eq(submissions.id, id));
 
-  // Try to deliver Stripe reward
+  // Try to deliver Stripe reward (credit or coupon)
   let rewardDelivered = false;
   let rewardError: string | null = null;
+  let issuedCode: string | null = null;
   try {
-    await deliverReward({ ...submission, bountyAmount: amountStr }, org);
+    if (rewardType === "stripe_coupon") {
+      issuedCode = await deliverCouponReward({ ...submission, bountyAmount: amountStr }, org);
+    } else {
+      await deliverCreditReward({ ...submission, bountyAmount: amountStr }, org);
+    }
     rewardDelivered = true;
   } catch (err) {
     rewardError = err instanceof Error ? err.message : "Reward delivery failed";
@@ -106,14 +115,18 @@ export async function approveSubmission(formData: FormData) {
       status: rewardDelivered ? "rewarded" : "approved",
       rewardDeliveredAt: rewardDelivered ? new Date() : null,
       rewardError,
+      rewardCode: issuedCode,
       updatedAt: new Date(),
     })
     .where(eq(submissions.id, id));
 
-  // Send email to reporter
+  // Send email to reporter — include code when issuing a coupon
+  const codeLine = rewardType === "stripe_coupon" && issuedCode
+    ? `\n\nYour code: ${issuedCode}\nApply it at checkout. Single-use, expires in 30 days.`
+    : "";
   await recordMessage({
     submissionId: id,
-    body: replyBody || `We've reviewed your report and approved a bounty.`,
+    body: (replyBody || `We've reviewed your report and approved a bounty.`) + codeLine,
     toEmail: submission.email,
     subject: rewardDelivered
       ? `Your bug bounty has been awarded — ${org.name}`
@@ -189,7 +202,19 @@ export async function replyToSubmission(formData: FormData) {
   redirect(`/submissions/${id}`);
 }
 
-async function deliverReward(submission: { id: string; email: string; name: string | null; title: string; bountyAmount: string; stripeCustomerId: string | null }, org: { id: string; stripeSecretKey: string | null }) {
+type RewardSubmission = {
+  id: string;
+  email: string;
+  name: string | null;
+  title: string;
+  bountyAmount: string;
+  stripeCustomerId: string | null;
+};
+
+async function deliverCreditReward(
+  submission: RewardSubmission,
+  org: { id: string; stripeSecretKey: string | null },
+) {
   const stripe = getStripeForOrg(org.stripeSecretKey);
   if (!stripe) {
     throw new Error("Stripe is not configured for this organization. Add a Stripe Secret Key in Settings.");
@@ -230,4 +255,44 @@ async function deliverReward(submission: { id: string; email: string; name: stri
   await db.update(submissions)
     .set({ stripeCustomerId: customerId })
     .where(and(eq(submissions.id, submission.id)));
+}
+
+async function deliverCouponReward(
+  submission: RewardSubmission,
+  org: { id: string; stripeSecretKey: string | null },
+): Promise<string> {
+  const stripe = getStripeForOrg(org.stripeSecretKey);
+  if (!stripe) {
+    throw new Error("Stripe is not configured for this organization. Add a Stripe Secret Key in Settings.");
+  }
+
+  const amount = Math.round(parseFloat(submission.bountyAmount) * 100);
+  const currency = "usd";
+
+  // Idempotent: same submission always produces the same coupon
+  const coupon = await stripe.coupons.create(
+    {
+      amount_off: amount,
+      currency,
+      duration: "once",
+      name: `Bug bounty reward ($${(amount / 100).toFixed(2)})`,
+      max_redemptions: 1,
+      metadata: { bounty_submission_id: submission.id, source: "friction_bounty" },
+    },
+    { idempotencyKey: `bounty-coupon-${submission.id}` },
+  );
+
+  const code = `BOUNTY-${submission.id.slice(0, 8).toUpperCase()}`;
+  const promo = await stripe.promotionCodes.create(
+    {
+      promotion: { type: "coupon", coupon: coupon.id },
+      code,
+      max_redemptions: 1,
+      expires_at: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
+      metadata: { bounty_submission_id: submission.id },
+    },
+    { idempotencyKey: `bounty-promo-${submission.id}` },
+  );
+
+  return promo.code;
 }

@@ -80,8 +80,9 @@ export const submissions = pgTable("submissions", {
   // Bounty status: pending, approved, rejected, rewarded, needs_info
   status: varchar("status", { length: 50 }).notNull().default("pending"),
   bountyAmount: decimal("bounty_amount", { precision: 10, scale: 2 }).notNull().default("10.00"),
-  rewardType: varchar("reward_type", { length: 50 }).default("stripe_credit"),
+  rewardType: varchar("reward_type", { length: 50 }).default("stripe_credit"), // stripe_credit | stripe_coupon
   stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
+  rewardCode: varchar("reward_code", { length: 64 }), // promo code if rewardType=stripe_coupon
 
   // Review tracking
   reviewerNotes: text("reviewer_notes"),

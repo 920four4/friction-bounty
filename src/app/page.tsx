@@ -21,13 +21,13 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6 py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center">
           <div>
             <div className="brutal-box-white inline-block px-3 py-1 mb-6">
-              <span className="font-mono text-xs uppercase">For SaaS &amp; Shopify stores</span>
+              <span className="font-mono text-xs uppercase">For SaaS products</span>
             </div>
             <h1 className="text-5xl md:text-6xl font-bold tracking-tight font-mono uppercase leading-[1.05] mb-6">
               Pay your users<br />to find your bugs.
             </h1>
             <p className="text-lg md:text-xl font-mono leading-relaxed mb-8 max-w-xl">
-              When something breaks on your site, most users leave. A handful would tell you — if it was easy and worth their time.
+              When something breaks in your app, most users churn quietly. A handful would tell you — if it was easy and worth their time.
               Friction Bounty makes it both. One script tag, one inbox, automatic Stripe rewards.
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
@@ -57,14 +57,14 @@ export default function Home() {
       <section className="bg-white border-b-4 border-black">
         <div className="max-w-6xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-6">
           <div className="brutal-box p-8">
-            <p className="font-mono text-xs uppercase text-gray-500 mb-2">For merchants</p>
-            <h2 className="text-2xl font-bold font-mono uppercase mb-4">Stop losing sales to silent bugs.</h2>
+            <p className="font-mono text-xs uppercase text-gray-500 mb-2">For SaaS teams</p>
+            <h2 className="text-2xl font-bold font-mono uppercase mb-4">Stop losing users to silent bugs.</h2>
             <ul className="space-y-3 text-sm leading-relaxed">
-              <Bullet>One install — works on any site, including Shopify themes</Bullet>
+              <Bullet>One install — drop a script tag into any web app</Bullet>
               <Bullet>Reports come with screenshot, browser, OS, viewport, exact URL</Bullet>
               <Bullet>You decide: approve &amp; reward, decline as spam, or reply for more info</Bullet>
-              <Bullet>Rewards are issued as Stripe customer credit on <em>your</em> account</Bullet>
-              <Bullet>Set bounty amounts per submission — a $20 credit beats a lost LTV</Bullet>
+              <Bullet>Rewards: Stripe customer credit (auto-applied at next checkout) <em>or</em> a single-use promo code</Bullet>
+              <Bullet>Set bounty amounts per submission — a $20 credit beats a churned LTV</Bullet>
             </ul>
             <Link href="/signup" className="brutal-btn-black inline-block mt-6">Create your inbox →</Link>
           </div>
@@ -93,7 +93,7 @@ export default function Home() {
             <Step n="1" title="Install" body="Sign up, copy your unique <script> tag, paste it before </body>. Done — the badge is live." />
             <Step n="2" title="User reports" body="A user hits a bug. They click the badge, type what broke, optionally snap a screenshot, hit submit." />
             <Step n="3" title="You review" body="In your inbox: full context, screenshot, page URL, browser. Approve, decline, or reply for more info." />
-            <Step n="4" title="Auto reward" body="Approve → we issue Stripe customer credit on your account. The reporter gets an email. You move on." />
+            <Step n="4" title="Auto reward" body="Approve → we issue Stripe customer credit (auto-applied at next checkout) or a single-use promo code. The reporter gets an email. You move on." />
           </div>
         </div>
       </section>
@@ -106,9 +106,9 @@ export default function Home() {
             <Feature title="Production context" body="Every report includes URL, browser, OS, viewport size, and an optional screenshot. Reproduce in minutes, not days." />
             <Feature title="Two-way conversation" body="Reply to a reporter for clarification before deciding. Every message is logged on the submission and emailed out." />
             <Feature title="Spam control" body="Rate-limited per IP per org. You always review before any money moves. Decline-as-spam closes the loop with the reporter." />
-            <Feature title="Per-org Stripe" body="Rewards land on your Stripe account, not ours. We never touch payout money — just trigger the credit." />
+            <Feature title="Per-org Stripe" body="Rewards land on your Stripe account, not ours. We never touch payout money — just trigger the credit or generate a promo code." />
             <Feature title="Configurable widget" body="Pick your color, position, welcome message, default bounty. Matches your brand without code." />
-            <Feature title="Built for ship-day" body="One JS file, no SDK, works on any stack. Shopify, WordPress, Next.js, plain HTML — all the same install." />
+            <Feature title="Built for ship-day" body="One JS file, no SDK, works on any web app. React, Next.js, Vue, plain HTML — all the same install." />
           </div>
         </div>
       </section>
@@ -121,20 +121,20 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 gap-6">
             <div className="brutal-box-white p-6 bg-white">
-              <p className="font-mono text-xs uppercase mb-3 text-gray-500">Any site</p>
+              <p className="font-mono text-xs uppercase mb-3 text-gray-500">Any web app</p>
               <pre className="brutal-box-sm p-4 font-mono text-xs bg-gray-900 text-green-400 overflow-x-auto whitespace-pre-wrap break-all">{`<script src="https://friction-bounty.vercel.app/widget.js"
         data-key="fb_pk_yourkey..."
         async></script>`}</pre>
-              <p className="text-sm text-gray-600 mt-3">Drop in before <code className="bg-gray-100 px-1">&lt;/body&gt;</code>. The widget self-configures from your account.</p>
+              <p className="text-sm text-gray-600 mt-3">Drop in before <code className="bg-gray-100 px-1">&lt;/body&gt;</code>. Works in React, Next.js, Vue, plain HTML — anywhere JS runs.</p>
             </div>
 
-            <div className="brutal-box-white p-6 bg-white">
-              <p className="font-mono text-xs uppercase mb-3 text-gray-500">Shopify</p>
-              <pre className="brutal-box-sm p-4 font-mono text-xs bg-gray-900 text-green-400 overflow-x-auto whitespace-pre-wrap break-all">{`<!-- theme.liquid, before </body> -->
-<script src="https://friction-bounty.vercel.app/widget.js"
-        data-key="fb_pk_yourkey..."
-        async></script>`}</pre>
-              <p className="text-sm text-gray-600 mt-3">Online Store → Themes → ⋯ → Edit code → <code className="bg-gray-100 px-1">layout/theme.liquid</code>.</p>
+            <div className="brutal-box-white p-6 bg-gray-50 relative">
+              <span className="absolute top-3 right-3 brutal-badge">Coming soon</span>
+              <p className="font-mono text-xs uppercase mb-3 text-gray-500">Shopify app</p>
+              <p className="text-sm text-gray-700 mb-3">
+                A native Shopify app that issues store credit and gift cards directly through Shopify&rsquo;s discount API — no Stripe key required.
+              </p>
+              <p className="text-xs text-gray-500 font-mono">Want early access? Email <strong>hi@frictionbounty.app</strong>.</p>
             </div>
           </div>
 

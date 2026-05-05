@@ -116,6 +116,9 @@ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'organizations' AND column_name = 'notify_on_submission') = FALSE THEN
     ALTER TABLE organizations ADD COLUMN notify_on_submission BOOLEAN NOT NULL DEFAULT TRUE;
   END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'submissions' AND column_name = 'reward_code') = FALSE THEN
+    ALTER TABLE submissions ADD COLUMN reward_code VARCHAR(64);
+  END IF;
 END $$;
 
 COMMIT;

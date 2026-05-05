@@ -50,7 +50,6 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   if (!org) redirect("/dashboard");
 
   const widgetSrc = `<script src="https://friction-bounty.vercel.app/widget.js" data-key="${org.apiKey}" async></script>`;
-  const shopifySrc = `{% comment %} Add to theme.liquid before </body> {% endcomment %}\n${widgetSrc}`;
 
   return (
     <main className="max-w-4xl mx-auto px-4 md:px-8 py-8 space-y-6">
@@ -66,17 +65,18 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
       <section className="brutal-box p-6">
         <h2 className="font-mono font-bold uppercase mb-4">Install the widget</h2>
         <p className="text-gray-700 mb-4 text-sm">
-          Add this <strong>once</strong> to your site, just before <code className="bg-gray-100 px-1">&lt;/body&gt;</code>. The widget auto-loads its config from your account.
+          Add this <strong>once</strong> to your app, just before <code className="bg-gray-100 px-1">&lt;/body&gt;</code>. The widget auto-loads its config from your account.
         </p>
         <pre className="brutal-box-sm p-4 font-mono text-xs bg-gray-900 text-green-400 overflow-x-auto whitespace-pre-wrap break-all mb-3">{widgetSrc}</pre>
 
-        <details className="mt-4">
-          <summary className="font-mono text-sm uppercase cursor-pointer">Shopify install</summary>
-          <p className="text-gray-700 text-sm mt-2 mb-2">
-            In your Shopify admin: <em>Online Store → Themes → ⋯ → Edit code → layout/theme.liquid</em>. Paste this above <code className="bg-gray-100 px-1">&lt;/body&gt;</code>:
-          </p>
-          <pre className="brutal-box-sm p-4 font-mono text-xs bg-gray-900 text-green-400 overflow-x-auto whitespace-pre-wrap break-all">{shopifySrc}</pre>
-        </details>
+        <p className="text-xs text-gray-500 font-mono mt-2">
+          Works in React, Next.js, Vue, Svelte, plain HTML — anywhere JavaScript runs in the browser.
+        </p>
+
+        <div className="mt-4 brutal-box-sm bg-gray-50 p-3 text-xs font-mono text-gray-600">
+          <strong className="block mb-1">On Shopify?</strong>
+          A native Shopify app (with gift cards via Shopify discount API, no Stripe key required) is in development. Email <strong>hi@frictionbounty.app</strong> for early access.
+        </div>
 
         <div className="mt-4 text-xs text-gray-500 font-mono">
           Your API key: <span className="bg-gray-100 px-2 py-1">{org.apiKey}</span>

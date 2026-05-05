@@ -31,35 +31,37 @@ export default async function GettingStartedPage() {
       <ProgressBar stripeReady={stripeReady} hasSubmission={subs.length > 0} />
 
       {/* Step 1 */}
-      <Step n={1} title="Install the widget on your site" status="todo">
+      <Step n={1} title="Install the widget in your app" status="todo">
         <p className="text-sm text-gray-700 mb-3">
           Paste this <strong>once</strong>, just before <code className="bg-gray-100 px-1">&lt;/body&gt;</code>. The widget reads its config from your account, so you never need to redeploy to change copy or color.
         </p>
         <Snippet code={widgetSnippet} />
 
         <details className="mt-4">
-          <summary className="font-mono text-sm uppercase cursor-pointer">Shopify</summary>
-          <ol className="list-decimal pl-5 mt-2 text-sm space-y-1">
-            <li>Shopify admin → <em>Online Store → Themes</em></li>
-            <li>On your active theme: <em>⋯ → Edit code</em></li>
-            <li>Open <code className="bg-gray-100 px-1">layout/theme.liquid</code></li>
-            <li>Paste the snippet above just before the closing <code className="bg-gray-100 px-1">&lt;/body&gt;</code> tag, save</li>
-          </ol>
-        </details>
-        <details className="mt-2">
-          <summary className="font-mono text-sm uppercase cursor-pointer">WordPress</summary>
-          <ol className="list-decimal pl-5 mt-2 text-sm space-y-1">
-            <li>Install the &ldquo;Insert Headers and Footers&rdquo; plugin (or use your theme&rsquo;s footer hook)</li>
-            <li>Paste the snippet into the <em>Footer</em> section, save</li>
-          </ol>
-        </details>
-        <details className="mt-2">
           <summary className="font-mono text-sm uppercase cursor-pointer">Next.js / React</summary>
           <p className="text-sm mt-2">
             In your root <code className="bg-gray-100 px-1">layout.tsx</code>, add the widget with the <code className="bg-gray-100 px-1">next/script</code> component:
           </p>
           <Snippet code={`import Script from "next/script";\n\n<Script src="https://friction-bounty.vercel.app/widget.js" data-key="${org.apiKey}" strategy="afterInteractive" />`} />
         </details>
+        <details className="mt-2">
+          <summary className="font-mono text-sm uppercase cursor-pointer">Vue / Nuxt</summary>
+          <p className="text-sm mt-2">
+            In <code className="bg-gray-100 px-1">nuxt.config.ts</code> under <code className="bg-gray-100 px-1">app.head.script</code>:
+          </p>
+          <Snippet code={`script: [\n  { src: 'https://friction-bounty.vercel.app/widget.js', 'data-key': '${org.apiKey}', async: true }\n]`} />
+        </details>
+        <details className="mt-2">
+          <summary className="font-mono text-sm uppercase cursor-pointer">Plain HTML</summary>
+          <p className="text-sm mt-2">Paste the snippet above into your HTML template, just before <code className="bg-gray-100 px-1">&lt;/body&gt;</code>.</p>
+        </details>
+
+        <div className="mt-4 brutal-box-sm bg-gray-50 p-3 text-xs font-mono text-gray-600">
+          <strong className="block mb-1">Shopify store?</strong>
+          We&rsquo;re building a native Shopify app that issues gift cards via Shopify&rsquo;s discount API — no Stripe key required.
+          For now, this script-tag flow does work on Shopify themes, but rewards (Stripe credit/promo codes) won&rsquo;t apply at Shopify checkout — Shopify uses its own discount system.
+          Email <strong>hi@frictionbounty.app</strong> for early access to the Shopify app.
+        </div>
       </Step>
 
       {/* Step 2 */}
@@ -118,19 +120,43 @@ export default async function GettingStartedPage() {
         <p className="text-sm text-gray-700 mb-1">Three things you can do:</p>
         <ul className="list-disc pl-5 text-sm space-y-1">
           <li><strong>Reply</strong> — emails the reporter (e.g. &ldquo;can you share the order number?&rdquo;). They reply directly to you.</li>
-          <li><strong>Approve &amp; reward</strong> — sets bounty (you can change it), issues Stripe credit, emails the reporter the good news.</li>
+          <li><strong>Approve &amp; reward</strong> — set the bounty (you can change it), pick a reward type (see step 6), and we issue it on your Stripe.</li>
           <li><strong>Decline</strong> — for spam, dupes, or non-bugs. The reason you type is emailed to the reporter.</li>
         </ul>
       </Step>
 
       {/* Step 6 */}
-      <Step n={6} title="What the reporter sees">
+      <Step n={6} title="Pick a reward type at approval time">
         <p className="text-sm text-gray-700 mb-3">
-          For approved reports, the bounty appears as <strong>account credit on your Stripe customer record</strong> for that email. Next time they check out on your site (using the same email), Stripe automatically deducts the credit from the order.
+          When you approve, you choose how the bounty is delivered. Both run on your Stripe account — we never touch the money.
         </p>
-        <p className="text-sm text-gray-700">
-          They get an email at every step: receipt on submit, your replies, and the final approve/decline.
-        </p>
+        <div className="space-y-3">
+          <div className="brutal-box-sm bg-white p-3">
+            <p className="font-mono text-xs uppercase mb-1">Customer credit <span className="brutal-badge">Default</span></p>
+            <p className="text-sm text-gray-700">
+              We add the bounty as a <strong>balance credit</strong> on your Stripe customer record for the reporter&rsquo;s email. Next time they check out (using the same email), Stripe auto-deducts it from the invoice. Best UX — they don&rsquo;t need to remember anything.
+            </p>
+            <p className="text-xs text-gray-500 mt-1 font-mono">Best for: SaaS subscriptions, products with repeat purchase, anywhere the reporter is already a customer.</p>
+          </div>
+          <div className="brutal-box-sm bg-white p-3">
+            <p className="font-mono text-xs uppercase mb-1">Promo code</p>
+            <p className="text-sm text-gray-700">
+              We create a one-time <strong>Stripe promotion code</strong> for the bounty amount and email it to the reporter. They paste it at checkout. Expires in 30 days, single-use.
+            </p>
+            <p className="text-xs text-gray-500 mt-1 font-mono">Best for: one-off purchases, when the reporter isn&rsquo;t yet a customer, or when you want them to see something tangible immediately.</p>
+          </div>
+        </div>
+      </Step>
+
+      {/* Step 7 */}
+      <Step n={7} title="What the reporter sees">
+        <p className="text-sm text-gray-700 mb-3">Throughout the flow, the reporter receives email at every step:</p>
+        <ul className="list-disc pl-5 text-sm space-y-1">
+          <li><strong>On submit</strong> — receipt with the bounty amount and what to expect</li>
+          <li><strong>On reply</strong> — your message, with reply-to set to your email so they can chase directly</li>
+          <li><strong>On approve</strong> — credit applied (no action needed) or promo code (with the code in the email)</li>
+          <li><strong>On decline</strong> — your reason, so it never feels arbitrary</li>
+        </ul>
       </Step>
 
       <div className="flex flex-wrap gap-3 pt-4 border-t-2 border-black">

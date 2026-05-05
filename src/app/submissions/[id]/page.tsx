@@ -130,9 +130,28 @@ export default async function SubmissionDetailPage({ params }: { params: Promise
                   defaultValue={submission.bountyAmount}
                   className="brutal-input"
                 />
+
+                <label className="brutal-label">Reward type</label>
+                <div className="space-y-2">
+                  <label className="brutal-box-sm bg-white p-2 flex items-start gap-2 cursor-pointer">
+                    <input type="radio" name="rewardType" value="stripe_credit" defaultChecked className="mt-1" />
+                    <span className="text-sm">
+                      <strong>Customer credit</strong>
+                      <span className="block text-xs text-gray-600">Auto-applied at the reporter&apos;s next checkout. Best UX, requires they use the same email.</span>
+                    </span>
+                  </label>
+                  <label className="brutal-box-sm bg-white p-2 flex items-start gap-2 cursor-pointer">
+                    <input type="radio" name="rewardType" value="stripe_coupon" className="mt-1" />
+                    <span className="text-sm">
+                      <strong>Promo code</strong>
+                      <span className="block text-xs text-gray-600">One-time code, expires in 30 days. Email-delivered, manually applied at checkout.</span>
+                    </span>
+                  </label>
+                </div>
+
                 <label className="brutal-label">Message to reporter (optional)</label>
                 <textarea name="body" rows={3} className="brutal-input" placeholder="Nice catch! We'll fix this in our next release." />
-                <button type="submit" className="brutal-btn-black w-full">Approve & reward</button>
+                <button type="submit" className="brutal-btn-black w-full">Approve &amp; reward</button>
               </form>
 
               <div className="border-t-2 border-black pt-4">
@@ -157,7 +176,14 @@ export default async function SubmissionDetailPage({ params }: { params: Promise
           {submission.status === "rewarded" && (
             <div className="brutal-box p-6" style={{ backgroundColor: "rgba(0,204,102,0.15)", borderColor: "#00CC66" }}>
               <h2 className="font-mono text-xs uppercase">Rewarded</h2>
-              <p className="font-medium">${submission.bountyAmount} credit issued</p>
+              <p className="font-medium">
+                ${submission.bountyAmount} {submission.rewardType === "stripe_coupon" ? "promo code" : "customer credit"} issued
+              </p>
+              {submission.rewardCode && (
+                <p className="font-mono text-xs mt-2">
+                  Code: <span className="bg-white border border-black px-2 py-0.5">{submission.rewardCode}</span>
+                </p>
+              )}
               {submission.rewardDeliveredAt && (
                 <p className="font-mono text-xs text-gray-600 mt-1">Delivered {new Date(submission.rewardDeliveredAt).toLocaleString()}</p>
               )}
