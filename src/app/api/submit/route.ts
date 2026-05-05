@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDb } from "../../../db";
-import { submissions, rateLimitLog } from "../../../db/schema";
 import { z } from "zod";
 import { UAParser } from "ua-parser-js";
+import { and, eq, gte } from "drizzle-orm";
+import { getDb } from "@/db";
+import { organizations, submissions, rateLimitLog } from "@/db/schema";
+import { corsPreflight, withCors } from "@/lib/cors";
 
 const submissionSchema = z.object({
+  apiKey: z.string().min(1),
   email: z.string().email(),
   name: z.string().optional(),
   issueType: z.enum(["bug", "ux_confusion", "feature_request"]),
@@ -20,95 +23,100 @@ const submissionSchema = z.object({
   fingerprint: z.string().optional(),
 });
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const db = getDb();
-    
-    // Validate input
-    const result = submissionSchema.safeParse(body);
-    if (!result.success) {
-      return NextResponse.json(
-        { error: "Invalid input", details: result.error.flatten() },
-        { status: 400 }
-      );
-    }
+export async function OPTIONS() {
+  return corsPreflight();
+}
 
-    const data = result.data;
-    
-    // Get IP address
-    const ipAddress = request.headers.get("x-forwarded-for") || 
-                      request.headers.get("x-real-ip") || 
-                      "unknown";
-    
-    // Rate limiting check: max 3 submissions per hour per IP
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    
-    const recentAttempts = await db.query.rateLimitLog.findMany({
-      where: (log, { and, eq, gte }) => and(
-        eq(log.ipAddress, ipAddress as string),
-        gte(log.attemptedAt, oneHourAgo)
-      ),
-    });
-    
-    if (recentAttempts.length >= 3) {
-      return NextResponse.json(
-        { error: "Rate limit exceeded. Please try again later." },
-        { status: 429 }
-      );
-    }
-    
-    // Log attempt
-    await db.insert(rateLimitLog).values({
-      ipAddress: ipAddress as string,
-      email: data.email,
-      fingerprint: data.fingerprint,
-    });
-    
-    // Parse User-Agent if not provided
-    let browser = data.browser;
-    let os = data.os;
-    
-    if (!browser || !os) {
-      const userAgent = request.headers.get("user-agent") || "";
-      const parser = new UAParser(userAgent);
-      browser = browser || parser.getBrowser().name || "Unknown";
-      os = os || parser.getOS().name || "Unknown";
-    }
-    
-    // Create submission
-    const submission = await db.insert(submissions).values({
-      email: data.email,
-      name: data.name,
-      issueType: data.issueType,
-      title: data.title,
-      description: data.description,
-      pageUrl: data.pageUrl,
-      screenshotUrl: data.screenshotUrl,
-      browser,
-      os,
-      viewportWidth: data.viewportWidth,
-      viewportHeight: data.viewportHeight,
-      referrer: data.referrer,
-      ipAddress: ipAddress as string,
-      fingerprint: data.fingerprint,
-      status: "pending",
-    }).returning();
-    
-    return NextResponse.json(
-      { 
-        success: true, 
-        id: submission[0].id,
-        message: "Submission received. We'll review and notify you via email."
-      },
-      { status: 201 }
-    );
-    
-  } catch (error) {
-    console.error("Submission error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+export async function POST(request: NextRequest) {
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return withCors(NextResponse.json({ error: "Invalid JSON" }, { status: 400 }));
   }
+
+  const result = submissionSchema.safeParse(body);
+  if (!result.success) {
+    return withCors(NextResponse.json(
+      { error: "Invalid input", details: result.error.flatten() },
+      { status: 400 }
+    ));
+  }
+  const data = result.data;
+
+  const db = getDb();
+
+  // Resolve org by API key
+  const org = await db.query.organizations.findFirst({
+    where: eq(organizations.apiKey, data.apiKey),
+  });
+  if (!org || !org.isActive) {
+    return withCors(NextResponse.json({ error: "Invalid or inactive API key" }, { status: 401 }));
+  }
+
+  const ipAddress = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+                    request.headers.get("x-real-ip") ||
+                    "unknown";
+
+  // Rate limit: 3 submissions / hour / IP / org
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  const recentAttempts = await db.query.rateLimitLog.findMany({
+    where: and(
+      eq(rateLimitLog.orgId, org.id),
+      eq(rateLimitLog.ipAddress, ipAddress),
+      gte(rateLimitLog.attemptedAt, oneHourAgo),
+    ),
+  });
+  if (recentAttempts.length >= 3) {
+    return withCors(NextResponse.json(
+      { error: "Rate limit exceeded. Please try again later." },
+      { status: 429 }
+    ));
+  }
+
+  await db.insert(rateLimitLog).values({
+    orgId: org.id,
+    ipAddress,
+    email: data.email,
+    fingerprint: data.fingerprint,
+  });
+
+  // Fill in browser/os from UA if widget didn't supply them
+  let browser = data.browser;
+  let os = data.os;
+  if (!browser || !os) {
+    const userAgent = request.headers.get("user-agent") || "";
+    const parser = new UAParser(userAgent);
+    browser = browser || parser.getBrowser().name || "Unknown";
+    os = os || parser.getOS().name || "Unknown";
+  }
+
+  const [submission] = await db.insert(submissions).values({
+    orgId: org.id,
+    email: data.email,
+    name: data.name,
+    issueType: data.issueType,
+    title: data.title,
+    description: data.description,
+    pageUrl: data.pageUrl,
+    screenshotUrl: data.screenshotUrl,
+    browser,
+    os,
+    viewportWidth: data.viewportWidth,
+    viewportHeight: data.viewportHeight,
+    referrer: data.referrer,
+    ipAddress,
+    fingerprint: data.fingerprint,
+    status: "pending",
+    bountyAmount: org.defaultBountyAmount,
+  }).returning();
+
+  return withCors(NextResponse.json(
+    {
+      success: true,
+      id: submission.id,
+      message: "Submission received. We'll review and notify you via email.",
+    },
+    { status: 201 }
+  ));
 }

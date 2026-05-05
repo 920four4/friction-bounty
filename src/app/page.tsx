@@ -1,258 +1,222 @@
 import Link from "next/link";
 
-// SVG Icons
-const BugIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/>
-  </svg>
-);
-
-const ZapIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-  </svg>
-);
-
-const LocationIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
-  </svg>
-);
-
-const ShieldIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
-  </svg>
-);
-
-const DollarIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-  </svg>
-);
-
 export default function Home() {
   return (
     <main className="min-h-screen">
-      {/* Hero Section */}
+      {/* Top bar */}
+      <nav className="border-b-2 border-black bg-white">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="font-mono font-bold uppercase text-sm">Friction Bounty</Link>
+          <div className="flex items-center gap-3">
+            <a href="#how" className="font-mono text-sm uppercase hidden md:inline hover:underline">How it works</a>
+            <a href="#install" className="font-mono text-sm uppercase hidden md:inline hover:underline">Install</a>
+            <Link href="/login" className="font-mono text-sm uppercase hover:underline">Log in</Link>
+            <Link href="/signup" className="brutal-btn-black text-sm">Start free</Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero */}
       <section className="bg-yellow-300 border-b-4 border-black">
-        <div className="max-w-5xl mx-auto px-6 py-20 md:py-32">
-          <div className="brutal-box-white p-8 md:p-12 inline-block mb-8 transform -rotate-1">
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight font-mono uppercase leading-none">
-              Friction<br/>Bounty
+        <div className="max-w-6xl mx-auto px-6 py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center">
+          <div>
+            <div className="brutal-box-white inline-block px-3 py-1 mb-6">
+              <span className="font-mono text-xs uppercase">For SaaS &amp; Shopify stores</span>
+            </div>
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight font-mono uppercase leading-[1.05] mb-6">
+              Pay your users<br />to find your bugs.
             </h1>
+            <p className="text-lg md:text-xl font-mono leading-relaxed mb-8 max-w-xl">
+              When something breaks on your site, most users leave. A handful would tell you — if it was easy and worth their time.
+              Friction Bounty makes it both. One script tag, one inbox, automatic Stripe rewards.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link href="/signup" className="brutal-btn-black text-center">Start free — get your install snippet</Link>
+              <a href="#how" className="brutal-btn text-center">See how it works</a>
+            </div>
+            <p className="font-mono text-xs text-black/60 mt-4">No credit card. Set your own bounty amount. Cancel anytime.</p>
           </div>
-          <p className="text-xl md:text-2xl max-w-2xl font-mono leading-relaxed mb-8">
-            Your users find bugs. Most never tell you—they just leave. 
-            Change that with a simple feedback widget and automatic rewards.
-          </p>
-          
-          {/* Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Link 
-              href="/admin"
-              className="px-8 py-4 font-mono font-bold uppercase text-center border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-              style={{ color: '#ffffff', backgroundColor: '#000000' }}
-            >
-              OPEN ADMIN →
-            </Link>
-            <a 
-              href="#how-it-works"
-              className="px-8 py-4 font-mono font-bold uppercase text-center border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-              style={{ color: '#000000', backgroundColor: '#ffffff' }}
-            >
-              HOW IT WORKS
-            </a>
+
+          {/* Mock dashboard preview */}
+          <div className="brutal-box bg-white p-1">
+            <div className="border-b-2 border-black bg-gray-100 px-3 py-2 font-mono text-xs uppercase flex items-center justify-between">
+              <span>Inbox · acme.shop</span>
+              <span className="brutal-badge-yellow">3 pending</span>
+            </div>
+            <div className="p-3 space-y-2 text-sm">
+              <MockRow status="pending" title="Checkout button does nothing on iOS Safari" who="rachel@…" amount="20" />
+              <MockRow status="rewarded" title="Coupon field cuts off on /cart" who="dev@…" amount="10" />
+              <MockRow status="rejected" title="i want a free shirt" who="spam@…" amount="0" />
+              <MockRow status="pending" title="Image gallery scrolls past last item" who="ben@…" amount="15" />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* The Problem */}
+      {/* Two audiences */}
       <section className="bg-white border-b-4 border-black">
-        <div className="max-w-5xl mx-auto px-6 py-20">
-          <h2 className="text-3xl md:text-4xl font-mono font-bold uppercase mb-12">
-            The Silent Churn
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="brutal-box p-8">
-              <div className="brutal-box-sm bg-yellow-300 w-12 h-12 flex items-center justify-center mb-4 text-black">
-                <BugIcon />
-              </div>
-              <h3 className="font-mono font-bold text-lg uppercase mb-3">User Hits a Bug</h3>
-              <p className="text-gray-700 leading-relaxed">
-                They're confused. Your support form is buried or requires signup. 
-                They give up and switch to a competitor.
-              </p>
-            </div>
-            <div className="brutal-box p-8">
-              <div className="brutal-box-sm bg-yellow-300 w-12 h-12 flex items-center justify-center mb-4 text-black text-2xl">
-                👻
-              </div>
-              <h3 className="font-mono font-bold text-lg uppercase mb-3">You Never Know</h3>
-              <p className="text-gray-700 leading-relaxed">
-                The bug stays live. More users hit it. Some churn. 
-                You lose revenue, unaware of the simple fix that could have saved them.
-              </p>
-            </div>
+        <div className="max-w-6xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-6">
+          <div className="brutal-box p-8">
+            <p className="font-mono text-xs uppercase text-gray-500 mb-2">For merchants</p>
+            <h2 className="text-2xl font-bold font-mono uppercase mb-4">Stop losing sales to silent bugs.</h2>
+            <ul className="space-y-3 text-sm leading-relaxed">
+              <Bullet>One install — works on any site, including Shopify themes</Bullet>
+              <Bullet>Reports come with screenshot, browser, OS, viewport, exact URL</Bullet>
+              <Bullet>You decide: approve &amp; reward, decline as spam, or reply for more info</Bullet>
+              <Bullet>Rewards are issued as Stripe customer credit on <em>your</em> account</Bullet>
+              <Bullet>Set bounty amounts per submission — a $20 credit beats a lost LTV</Bullet>
+            </ul>
+            <Link href="/signup" className="brutal-btn-black inline-block mt-6">Create your inbox →</Link>
+          </div>
+
+          <div className="brutal-box p-8 bg-blue-50">
+            <p className="font-mono text-xs uppercase text-gray-500 mb-2">For users / hunters</p>
+            <h2 className="text-2xl font-bold font-mono uppercase mb-4">Get paid for things you&rsquo;d report anyway.</h2>
+            <ul className="space-y-3 text-sm leading-relaxed">
+              <Bullet>Click the badge on any participating site, take 30 seconds</Bullet>
+              <Bullet>Optional one-click screenshot — no signup required to submit</Bullet>
+              <Bullet>Real bounties, not points: store credit hits your Stripe-linked account</Bullet>
+              <Bullet>Get an email reply from the merchant — approved, declined, or asking for more</Bullet>
+            </ul>
+            <p className="font-mono text-xs text-gray-600 mt-6">No hunter signup. The widget on the merchant&rsquo;s site is everything you need.</p>
           </div>
         </div>
       </section>
 
-      {/* The Solution */}
-      <section id="how-it-works" className="bg-green-100 border-b-4 border-black">
-        <div className="max-w-5xl mx-auto px-6 py-20">
-          <h2 className="text-3xl md:text-4xl font-mono font-bold uppercase mb-4">
-            A Simple Trade
-          </h2>
-          <p className="text-xl font-mono mb-12 max-w-3xl">
-            Users give you quality bug reports. You give them account credit. Everyone wins.
-          </p>
+      {/* How it works */}
+      <section id="how" className="bg-green-50 border-b-4 border-black">
+        <div className="max-w-6xl mx-auto px-6 py-20">
+          <h2 className="text-3xl md:text-4xl font-mono font-bold uppercase mb-3">How it works</h2>
+          <p className="text-lg font-mono mb-12 max-w-3xl">Four steps. No engineering team required.</p>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="brutal-box-white p-6">
-              <div className="brutal-box-sm bg-black text-white w-12 h-12 flex items-center justify-center font-mono font-bold text-xl mb-4">1</div>
-              <h3 className="font-mono font-bold uppercase mb-3">Widget Appears</h3>
-              <p className="text-gray-700 text-sm leading-relaxed">
-                A small button sits on your site. When users hit friction, they click it.
-              </p>
-            </div>
-            <div className="brutal-box-white p-6">
-              <div className="brutal-box-sm bg-black text-white w-12 h-12 flex items-center justify-center font-mono font-bold text-xl mb-4">2</div>
-              <h3 className="font-mono font-bold uppercase mb-3">Quick Report</h3>
-              <p className="text-gray-700 text-sm leading-relaxed">
-                Dead simple form: what happened, where, optional screenshot. 
-                No account required.
-              </p>
-            </div>
-            <div className="brutal-box-white p-6">
-              <div className="brutal-box-sm bg-black text-white w-12 h-12 flex items-center justify-center font-mono font-bold text-xl mb-4">3</div>
-              <h3 className="font-mono font-bold uppercase mb-3">Auto Reward</h3>
-              <p className="text-gray-700 text-sm leading-relaxed">
-                You review and approve. Stripe credit is applied automatically. 
-                No manual payouts.
-              </p>
-            </div>
+          <div className="grid md:grid-cols-4 gap-4">
+            <Step n="1" title="Install" body="Sign up, copy your unique <script> tag, paste it before </body>. Done — the badge is live." />
+            <Step n="2" title="User reports" body="A user hits a bug. They click the badge, type what broke, optionally snap a screenshot, hit submit." />
+            <Step n="3" title="You review" body="In your inbox: full context, screenshot, page URL, browser. Approve, decline, or reply for more info." />
+            <Step n="4" title="Auto reward" body="Approve → we issue Stripe customer credit on your account. The reporter gets an email. You move on." />
           </div>
         </div>
       </section>
 
-      {/* What You Get */}
+      {/* What you get */}
       <section className="bg-white border-b-4 border-black">
-        <div className="max-w-5xl mx-auto px-6 py-20">
-          <h2 className="text-3xl md:text-4xl font-mono font-bold uppercase mb-12">
-            What You Get
-          </h2>
-          
+        <div className="max-w-6xl mx-auto px-6 py-20">
+          <h2 className="text-3xl md:text-4xl font-mono font-bold uppercase mb-12">What&rsquo;s in the box</h2>
+          <div className="grid md:grid-cols-3 gap-4">
+            <Feature title="Production context" body="Every report includes URL, browser, OS, viewport size, and an optional screenshot. Reproduce in minutes, not days." />
+            <Feature title="Two-way conversation" body="Reply to a reporter for clarification before deciding. Every message is logged on the submission and emailed out." />
+            <Feature title="Spam control" body="Rate-limited per IP per org. You always review before any money moves. Decline-as-spam closes the loop with the reporter." />
+            <Feature title="Per-org Stripe" body="Rewards land on your Stripe account, not ours. We never touch payout money — just trigger the credit." />
+            <Feature title="Configurable widget" body="Pick your color, position, welcome message, default bounty. Matches your brand without code." />
+            <Feature title="Built for ship-day" body="One JS file, no SDK, works on any stack. Shopify, WordPress, Next.js, plain HTML — all the same install." />
+          </div>
+        </div>
+      </section>
+
+      {/* Install */}
+      <section id="install" className="bg-blue-100 border-b-4 border-black">
+        <div className="max-w-6xl mx-auto px-6 py-20">
+          <h2 className="text-3xl md:text-4xl font-mono font-bold uppercase mb-3">Install in 30 seconds</h2>
+          <p className="font-mono text-lg mb-8 max-w-3xl">Sign up, grab your key, paste one line.</p>
+
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="brutal-box p-6">
-              <div className="flex items-start gap-4">
-                <div className="brutal-box-sm bg-red-400 w-12 h-12 flex items-center justify-center mb-4 text-black shrink-0">
-                  <LocationIcon />
-                </div>
-                <div>
-                  <h3 className="font-mono font-bold uppercase mb-2">Production Context</h3>
-                  <p className="text-gray-700 text-sm">
-                    Every report includes exact URL, browser, OS, viewport, and screenshot. 
-                    Reproduce issues exactly as users see them.
-                  </p>
-                </div>
-              </div>
+            <div className="brutal-box-white p-6 bg-white">
+              <p className="font-mono text-xs uppercase mb-3 text-gray-500">Any site</p>
+              <pre className="brutal-box-sm p-4 font-mono text-xs bg-gray-900 text-green-400 overflow-x-auto whitespace-pre-wrap break-all">{`<script src="https://friction-bounty.vercel.app/widget.js"
+        data-key="fb_pk_yourkey..."
+        async></script>`}</pre>
+              <p className="text-sm text-gray-600 mt-3">Drop in before <code className="bg-gray-100 px-1">&lt;/body&gt;</code>. The widget self-configures from your account.</p>
             </div>
-            <div className="brutal-box p-6">
-              <div className="flex items-start gap-4">
-                <div className="brutal-box-sm bg-blue-400 w-12 h-12 flex items-center justify-center mb-4 text-black shrink-0">
-                  <ZapIcon />
-                </div>
-                <div>
-                  <h3 className="font-mono font-bold uppercase mb-2">Automatic Rewards</h3>
-                  <p className="text-gray-700 text-sm">
-                    Approve a report → Stripe creates customer (if needed) + 
-                    account credit applied instantly.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="brutal-box p-6">
-              <div className="flex items-start gap-4">
-                <div className="brutal-box-sm bg-red-400 w-12 h-12 flex items-center justify-center mb-4 text-black shrink-0">
-                  <ShieldIcon />
-                </div>
-                <div>
-                  <h3 className="font-mono font-bold uppercase mb-2">Spam Protection</h3>
-                  <p className="text-gray-700 text-sm">
-                    Max 3 submissions per hour per IP. You review before any credit is awarded.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="brutal-box p-6">
-              <div className="flex items-start gap-4">
-                <div className="brutal-box-sm bg-yellow-300 w-12 h-12 flex items-center justify-center mb-4 text-black shrink-0">
-                  <DollarIcon />
-                </div>
-                <div>
-                  <h3 className="font-mono font-bold uppercase mb-2">Cost Efficient</h3>
-                  <p className="text-gray-700 text-sm">
-                    A $20 credit bounty beats losing a customer worth hundreds in LTV.
-                  </p>
-                </div>
-              </div>
+
+            <div className="brutal-box-white p-6 bg-white">
+              <p className="font-mono text-xs uppercase mb-3 text-gray-500">Shopify</p>
+              <pre className="brutal-box-sm p-4 font-mono text-xs bg-gray-900 text-green-400 overflow-x-auto whitespace-pre-wrap break-all">{`<!-- theme.liquid, before </body> -->
+<script src="https://friction-bounty.vercel.app/widget.js"
+        data-key="fb_pk_yourkey..."
+        async></script>`}</pre>
+              <p className="text-sm text-gray-600 mt-3">Online Store → Themes → ⋯ → Edit code → <code className="bg-gray-100 px-1">layout/theme.liquid</code>.</p>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Installation */}
-      <section className="bg-blue-100 border-b-4 border-black">
-        <div className="max-w-5xl mx-auto px-6 py-20">
-          <h2 className="text-3xl md:text-4xl font-mono font-bold uppercase mb-8">
-            Installation
-          </h2>
-          
-          <div className="brutal-box-white p-8 bg-white">
-            <p className="mb-6 text-gray-700">
-              Add this script to your website, just before the closing <code className="bg-gray-100 px-2 py-1 font-mono text-sm">&lt;/body&gt;</code> tag:
-            </p>
-            <code className="brutal-box-sm block p-6 font-mono text-sm bg-gray-900 text-green-400 overflow-x-auto mb-6 border-2 border-black">
-              {`<script src="https://friction-bounty.vercel.app/widget.js" async></script>`}
-            </code>
-            <p className="text-sm text-gray-600">
-              The widget auto-detects your domain. No configuration needed.
-            </p>
+          <div className="mt-8">
+            <Link href="/signup" className="brutal-btn-black inline-block">Get my key →</Link>
           </div>
         </div>
       </section>
 
       {/* CTA */}
       <section className="bg-black text-white">
-        <div className="max-w-5xl mx-auto px-6 py-20">
+        <div className="max-w-6xl mx-auto px-6 py-20">
           <div className="brutal-box-white bg-white text-black p-8 md:p-12">
-            <h2 className="text-3xl md:text-4xl font-mono font-bold uppercase mb-4">
-              Ready to Catch More Bugs?
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-mono font-bold uppercase mb-4">Catch the bugs that cost you customers.</h2>
             <p className="font-mono text-lg mb-8 max-w-2xl">
-              Review submissions, approve bounties, and see what's actually 
-              happening on your site.
+              The cheapest bug report is the one a user willingly hands you. Make it worth their time.
             </p>
-            <Link 
-              href="/admin" 
-              className="px-8 py-4 font-mono font-bold uppercase inline-block border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-              style={{ color: '#000000', backgroundColor: '#FFE100' }}
-            >
-              OPEN ADMIN DASHBOARD →
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link href="/signup" className="brutal-btn-black bg-yellow-300 text-black border-black inline-block text-center">Start free</Link>
+              <Link href="/login" className="brutal-btn inline-block text-center">I already have an account</Link>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-gray-100 border-t-4 border-black">
-        <div className="max-w-5xl mx-auto px-6 py-8">
-          <p className="font-mono text-sm text-gray-600">
-            Friction Bounty — Built by 920four
-          </p>
+        <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row justify-between gap-3">
+          <p className="font-mono text-sm text-gray-600">Friction Bounty — built by 920four</p>
+          <div className="flex gap-4 font-mono text-sm text-gray-600">
+            <Link href="/login">Log in</Link>
+            <Link href="/signup">Sign up</Link>
+          </div>
         </div>
       </footer>
     </main>
+  );
+}
+
+function Bullet({ children }: { children: React.ReactNode }) {
+  return (
+    <li className="flex gap-3">
+      <span aria-hidden className="font-mono">→</span>
+      <span>{children}</span>
+    </li>
+  );
+}
+
+function Step({ n, title, body }: { n: string; title: string; body: string }) {
+  return (
+    <div className="brutal-box-white p-5">
+      <div className="brutal-box-sm bg-black text-white w-10 h-10 flex items-center justify-center font-mono font-bold mb-3">{n}</div>
+      <h3 className="font-mono font-bold uppercase mb-2">{title}</h3>
+      <p className="text-sm text-gray-700 leading-relaxed">{body}</p>
+    </div>
+  );
+}
+
+function Feature({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="brutal-box p-5">
+      <h3 className="font-mono font-bold uppercase mb-2">{title}</h3>
+      <p className="text-sm text-gray-700 leading-relaxed">{body}</p>
+    </div>
+  );
+}
+
+function MockRow({ status, title, who, amount }: { status: "pending" | "rewarded" | "rejected"; title: string; who: string; amount: string }) {
+  const badge = status === "pending"
+    ? <span className="brutal-badge-yellow">pending</span>
+    : status === "rewarded"
+      ? <span className="inline-block border border-black bg-green-500 text-white px-2 py-0.5 text-xs font-mono uppercase">rewarded</span>
+      : <span className="inline-block border border-black bg-gray-400 text-white px-2 py-0.5 text-xs font-mono uppercase">rejected</span>;
+  return (
+    <div className="border-2 border-black px-3 py-2 flex items-center justify-between gap-3">
+      <div className="flex items-center gap-2 min-w-0">
+        {badge}
+        <span className="truncate">{title}</span>
+      </div>
+      <div className="flex items-center gap-3 font-mono text-xs text-gray-500 shrink-0">
+        <span>{who}</span>
+        <span>${amount}</span>
+      </div>
+    </div>
   );
 }
