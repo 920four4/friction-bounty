@@ -19,6 +19,8 @@ async function saveSettings(formData: FormData) {
   const stripeSecretKey = (formData.get("stripeSecretKey") as string || "").trim();
   const websiteUrl = (formData.get("websiteUrl") as string || "").trim();
   const orgName = (formData.get("orgName") as string || "").trim();
+  const notificationEmail = (formData.get("notificationEmail") as string || "").trim();
+  const notifyOnSubmission = formData.get("notifyOnSubmission") === "on";
 
   await db.update(organizations)
     .set({
@@ -28,6 +30,8 @@ async function saveSettings(formData: FormData) {
       widgetPosition,
       widgetWelcomeMessage: widgetWelcomeMessage || undefined,
       websiteUrl: websiteUrl || null,
+      notificationEmail: notificationEmail || null,
+      notifyOnSubmission,
       ...(stripeSecretKey ? { stripeSecretKey } : {}),
       updatedAt: new Date(),
     })
@@ -94,6 +98,34 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
           <h2 className="font-mono font-bold uppercase mb-4">Bounty</h2>
           <div className="grid md:grid-cols-2 gap-4">
             <Field label="Default amount (USD)" name="defaultBountyAmount" type="number" step="0.01" defaultValue={org.defaultBountyAmount.toString()} />
+          </div>
+        </section>
+
+        {/* Notifications */}
+        <section className="brutal-box p-6">
+          <h2 className="font-mono font-bold uppercase mb-4">Notifications</h2>
+          <p className="text-gray-700 text-sm mb-4">
+            We email you whenever a new report lands. Reporters automatically get a receipt and a reply when you respond.
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Field
+              label="Notification email"
+              name="notificationEmail"
+              type="email"
+              defaultValue={org.notificationEmail ?? ""}
+              placeholder="bugs@yourstore.com (defaults to your account email)"
+            />
+            <div className="flex items-end">
+              <label className="flex items-center gap-2 font-mono text-sm">
+                <input
+                  type="checkbox"
+                  name="notifyOnSubmission"
+                  defaultChecked={org.notifyOnSubmission}
+                  className="w-4 h-4 border-2 border-black"
+                />
+                Email me for every new submission
+              </label>
+            </div>
           </div>
         </section>
 

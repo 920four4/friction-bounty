@@ -39,8 +39,14 @@ export default async function DashboardInbox() {
         {list.length === 0 ? (
           <div className="brutal-box p-12 text-center">
             <p className="font-mono text-lg mb-2">No submissions yet</p>
-            <p className="text-gray-500 mb-6">Install the widget on your site and bug reports will land here.</p>
-            <Link href="/dashboard/settings" className="brutal-btn-black inline-block">Get install snippet →</Link>
+            <p className="text-gray-500 mb-6">
+              Install the widget on your site and bug reports will land here.
+              The setup guide walks you through it in 5 minutes.
+            </p>
+            <div className="flex flex-wrap gap-3 justify-center">
+              <Link href="/dashboard/getting-started" className="brutal-btn-black inline-block">Setup guide →</Link>
+              <Link href="/dashboard/settings" className="brutal-btn inline-block">Just give me the snippet</Link>
+            </div>
           </div>
         ) : (
           <div className="space-y-3">

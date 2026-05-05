@@ -55,5 +55,5 @@ export async function POST(request: NextRequest) {
 
   await setSession({ uid: user.id, role: "org_owner", oid: org.id });
 
-  return NextResponse.json({ ok: true, redirect: "/dashboard" });
+  return NextResponse.json({ ok: true, redirect: "/dashboard/getting-started" });
 }

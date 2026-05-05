@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { UAParser } from "ua-parser-js";
 import { and, eq, gte } from "drizzle-orm";
 import { getDb } from "@/db";
-import { organizations, submissions, rateLimitLog } from "@/db/schema";
+import { organizations, submissions, rateLimitLog, users } from "@/db/schema";
 import { corsPreflight, withCors } from "@/lib/cors";
+import { sendNewSubmissionToOwner, sendSubmissionReceiptToReporter } from "@/lib/email";
 
 const submissionSchema = z.object({
   apiKey: z.string().min(1),
@@ -111,6 +112,45 @@ export async function POST(request: NextRequest) {
     bountyAmount: org.defaultBountyAmount,
   }).returning();
 
+  // Notify owner + send receipt to reporter — runs after the response is sent.
+  after(async () => {
+    try {
+      const appBaseUrl = appBaseUrlFromRequest(request);
+
+      // Resolve recipient: org's notification_email override → first owner's email
+      let ownerEmail = org.notificationEmail;
+      if (!ownerEmail) {
+        const owner = await db.query.users.findFirst({ where: eq(users.orgId, org.id) });
+        ownerEmail = owner?.email ?? null;
+      }
+
+      const tasks: Promise<unknown>[] = [];
+      if (ownerEmail && org.notifyOnSubmission) {
+        tasks.push(sendNewSubmissionToOwner({
+          toEmail: ownerEmail,
+          orgName: org.name,
+          submissionId: submission.id,
+          submissionTitle: submission.title,
+          reporterEmail: submission.email,
+          description: submission.description,
+          pageUrl: submission.pageUrl,
+          bountyAmount: submission.bountyAmount.toString(),
+          appBaseUrl,
+        }));
+      }
+      tasks.push(sendSubmissionReceiptToReporter({
+        toEmail: submission.email,
+        orgName: org.name,
+        submissionTitle: submission.title,
+        bountyAmount: submission.bountyAmount.toString(),
+        ownerReplyTo: ownerEmail ?? undefined,
+      }));
+      await Promise.allSettled(tasks);
+    } catch (err) {
+      console.error("submission notification failed", err);
+    }
+  });
+
   return withCors(NextResponse.json(
     {
       success: true,
@@ -119,4 +159,13 @@ export async function POST(request: NextRequest) {
     },
     { status: 201 }
   ));
+}
+
+function appBaseUrlFromRequest(request: NextRequest): string {
+  const explicit = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL;
+  if (explicit) return explicit.replace(/\/$/, "");
+  // Fall back to the request's own origin (works on Vercel preview + prod)
+  const proto = request.headers.get("x-forwarded-proto") || "https";
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
+  return host ? `${proto}://${host}` : "https://friction-bounty.vercel.app";
 }

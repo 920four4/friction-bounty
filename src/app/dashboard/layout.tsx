@@ -18,6 +18,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
           <nav className="flex items-center gap-4">
             <Link href="/dashboard" className="font-mono text-sm uppercase hover:underline">Inbox</Link>
+            <Link href="/dashboard/getting-started" className="font-mono text-sm uppercase hover:underline">Setup</Link>
             <Link href="/dashboard/settings" className="font-mono text-sm uppercase hover:underline">Settings</Link>
             <span className="font-mono text-xs text-gray-400 hidden md:inline">{user?.email}</span>
             <form action="/api/auth/logout" method="POST">

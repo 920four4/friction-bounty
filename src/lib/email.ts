@@ -41,6 +41,64 @@ export async function sendEmail(opts: {
   }
 }
 
+export async function sendNewSubmissionToOwner(opts: {
+  toEmail: string;
+  orgName: string;
+  submissionId: string;
+  submissionTitle: string;
+  reporterEmail: string;
+  description: string;
+  pageUrl: string;
+  bountyAmount: string;
+  appBaseUrl: string;
+}): Promise<SendResult> {
+  const reviewUrl = `${opts.appBaseUrl}/submissions/${opts.submissionId}`;
+  const subject = `[${opts.orgName}] New bug report: ${truncate(opts.submissionTitle, 80)}`;
+  const text = [
+    `New report on ${opts.orgName}.`,
+    ``,
+    `Title:    ${opts.submissionTitle}`,
+    `From:     ${opts.reporterEmail}`,
+    `Page:     ${opts.pageUrl}`,
+    `Default bounty: $${opts.bountyAmount}`,
+    ``,
+    `Description:`,
+    truncate(opts.description, 600),
+    ``,
+    `Review and decide:`,
+    reviewUrl,
+    ``,
+    `— Friction Bounty`,
+  ].join("\n");
+  return sendEmail({ to: opts.toEmail, subject, text });
+}
+
+export async function sendSubmissionReceiptToReporter(opts: {
+  toEmail: string;
+  orgName: string;
+  submissionTitle: string;
+  bountyAmount: string;
+  ownerReplyTo?: string;
+}): Promise<SendResult> {
+  const subject = `Got your report — ${opts.orgName}`;
+  const text = [
+    `Thanks for the report.`,
+    ``,
+    `${opts.orgName} received your submission: "${opts.submissionTitle}".`,
+    `If approved, you'll be issued $${opts.bountyAmount} in store credit.`,
+    ``,
+    `We'll email you with a decision (usually within a few days). If we need more info, reply to this email.`,
+    ``,
+    `— ${opts.orgName} via Friction Bounty`,
+  ].join("\n");
+  return sendEmail({ to: opts.toEmail, subject, text, replyTo: opts.ownerReplyTo });
+}
+
+function truncate(s: string, n: number): string {
+  if (s.length <= n) return s;
+  return s.slice(0, n - 1) + "…";
+}
+
 export function reporterReplyTemplate(opts: {
   orgName: string;
   submissionTitle: string;

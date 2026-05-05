@@ -13,6 +13,10 @@ export const organizations = pgTable("organizations", {
   // Per-org Stripe (merchant-managed) for issuing rewards on their account.
   stripeSecretKey: text("stripe_secret_key"),
 
+  // Where to send "new submission" notifications. Falls back to owner's email.
+  notificationEmail: varchar("notification_email", { length: 255 }),
+  notifyOnSubmission: boolean("notify_on_submission").notNull().default(true),
+
   // Reward defaults
   defaultBountyAmount: decimal("default_bounty_amount", { precision: 10, scale: 2 }).notNull().default("10.00"),
   bountyCurrency: varchar("bounty_currency", { length: 3 }).notNull().default("USD"),

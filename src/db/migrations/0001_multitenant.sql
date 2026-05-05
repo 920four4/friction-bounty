@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS organizations (
   website_url TEXT,
   api_key VARCHAR(64) NOT NULL,
   stripe_secret_key TEXT,
+  notification_email VARCHAR(255),
+  notify_on_submission BOOLEAN NOT NULL DEFAULT TRUE,
   default_bounty_amount NUMERIC(10, 2) NOT NULL DEFAULT 10.00,
   bounty_currency VARCHAR(3) NOT NULL DEFAULT 'USD',
   widget_primary_color VARCHAR(7) NOT NULL DEFAULT '#FFE100',
@@ -104,5 +106,16 @@ CREATE INDEX IF NOT EXISTS rate_limit_org_ip_idx ON rate_limit_log(org_id, ip_ad
 
 -- 6. Drop the old single-tenant app_settings table — settings now live on organizations.
 DROP TABLE IF EXISTS app_settings;
+
+-- 7. Idempotent column adds for re-runs of an older 0001
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'organizations' AND column_name = 'notification_email') = FALSE THEN
+    ALTER TABLE organizations ADD COLUMN notification_email VARCHAR(255);
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'organizations' AND column_name = 'notify_on_submission') = FALSE THEN
+    ALTER TABLE organizations ADD COLUMN notify_on_submission BOOLEAN NOT NULL DEFAULT TRUE;
+  END IF;
+END $$;
 
 COMMIT;
