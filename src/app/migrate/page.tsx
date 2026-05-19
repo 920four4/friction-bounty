@@ -35,7 +35,10 @@ export default function MigratePage() {
         <Link href="/" className="font-mono text-xs uppercase text-gray-500 hover:underline">← Friction Bounty</Link>
         <h1 className="text-3xl font-bold font-mono uppercase mt-4 mb-1">Database setup</h1>
         <p className="text-gray-600 mb-6 font-mono text-sm">
-          One-shot migration runner. Idempotent — safe to run repeatedly. Use this once after deploy, or after schema changes.
+          One-shot migration runner. Idempotent — safe to run repeatedly.
+          Requires either an active super-admin session, OR
+          <code className="bg-gray-100 px-1 mx-1">MIGRATE_ENABLED=1</code>
+          set in the Vercel environment for password-based access.
         </p>
 
         <form onSubmit={handleRun} className="space-y-4">
@@ -45,13 +48,12 @@ export default function MigratePage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
               autoFocus
               className="brutal-input"
-              placeholder="Matches SUPER_ADMIN_PASSWORD env var"
+              placeholder="Only used when MIGRATE_ENABLED=1"
             />
             <p className="text-xs text-gray-500 mt-1 font-mono">
-              Set in Vercel → Settings → Environment Variables.
+              If you&rsquo;re already logged in as super-admin, leave blank and click run.
             </p>
           </div>
 

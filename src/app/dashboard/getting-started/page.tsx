@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getDb } from "@/db";
 import { organizations, submissions } from "@/db/schema";
 import { requireOrgOwner } from "@/lib/auth";
+import { widgetBaseUrl } from "@/lib/url";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,8 @@ export default async function GettingStartedPage() {
 
   const subs = await db.query.submissions.findMany({ where: eq(submissions.orgId, orgId), limit: 1 });
   const stripeReady = !!org.stripeSecretKey;
-  const widgetSnippet = `<script src="https://friction-bounty.vercel.app/widget.js" data-key="${org.apiKey}" async></script>`;
+  const widgetUrl = `${widgetBaseUrl()}/widget.js`;
+  const widgetSnippet = `<script src="${widgetUrl}" data-key="${org.apiKey}" async></script>`;
 
   return (
     <main className="max-w-4xl mx-auto px-4 md:px-8 py-8 space-y-6">
@@ -42,14 +44,14 @@ export default async function GettingStartedPage() {
           <p className="text-sm mt-2">
             In your root <code className="bg-gray-100 px-1">layout.tsx</code>, add the widget with the <code className="bg-gray-100 px-1">next/script</code> component:
           </p>
-          <Snippet code={`import Script from "next/script";\n\n<Script src="https://friction-bounty.vercel.app/widget.js" data-key="${org.apiKey}" strategy="afterInteractive" />`} />
+          <Snippet code={`import Script from "next/script";\n\n<Script src="${widgetUrl}" data-key="${org.apiKey}" strategy="afterInteractive" />`} />
         </details>
         <details className="mt-2">
           <summary className="font-mono text-sm uppercase cursor-pointer">Vue / Nuxt</summary>
           <p className="text-sm mt-2">
             In <code className="bg-gray-100 px-1">nuxt.config.ts</code> under <code className="bg-gray-100 px-1">app.head.script</code>:
           </p>
-          <Snippet code={`script: [\n  { src: 'https://friction-bounty.vercel.app/widget.js', 'data-key': '${org.apiKey}', async: true }\n]`} />
+          <Snippet code={`script: [\n  { src: '${widgetUrl}', 'data-key': '${org.apiKey}', async: true }\n]`} />
         </details>
         <details className="mt-2">
           <summary className="font-mono text-sm uppercase cursor-pointer">Plain HTML</summary>
@@ -85,7 +87,7 @@ export default async function GettingStartedPage() {
       </Step>
 
       {/* Step 3 */}
-      <Step n={3} title="Tune the widget &amp; bounty amount" status="optional">
+      <Step n={3} title={<>Tune the widget &amp; bounty amount</>} status="optional">
         <p className="text-sm text-gray-700 mb-3">
           On <Link href="/dashboard/settings" className="underline">Settings</Link> you can change:
         </p>
@@ -189,7 +191,7 @@ function ProgressBar({ stripeReady, hasSubmission }: { stripeReady: boolean; has
   );
 }
 
-function Step({ n, title, status, children }: { n: number; title: string; status?: "todo" | "done" | "optional"; children: React.ReactNode }) {
+function Step({ n, title, status, children }: { n: number; title: React.ReactNode; status?: "todo" | "done" | "optional"; children: React.ReactNode }) {
   const badge =
     status === "done" ? <span className="brutal-badge bg-green-500 text-white">Done</span>
     : status === "optional" ? <span className="brutal-badge">Optional</span>
@@ -198,7 +200,7 @@ function Step({ n, title, status, children }: { n: number; title: string; status
     <section className="brutal-box p-6">
       <header className="flex flex-wrap items-center gap-3 mb-3">
         <span className="brutal-box-sm bg-black text-white w-9 h-9 flex items-center justify-center font-mono font-bold">{n}</span>
-        <h2 className="font-mono font-bold uppercase text-lg" dangerouslySetInnerHTML={{ __html: title }} />
+        <h2 className="font-mono font-bold uppercase text-lg">{title}</h2>
         {badge}
       </header>
       <div>{children}</div>

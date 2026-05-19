@@ -9,9 +9,9 @@ const SESSION_COOKIE = "fb_session";
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 function getSessionSecret(): string {
-  const secret = process.env.SESSION_SECRET || process.env.ADMIN_PASSWORD;
-  if (!secret) {
-    throw new Error("SESSION_SECRET (or ADMIN_PASSWORD as fallback) must be set");
+  const secret = process.env.SESSION_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("SESSION_SECRET must be set and at least 32 characters");
   }
   return secret;
 }
@@ -22,6 +22,17 @@ function getSuperAdminEmail(): string | null {
 
 function getSuperAdminPassword(): string | null {
   return process.env.SUPER_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || null;
+}
+
+function constantTimeEqual(a: string, b: string): boolean {
+  const aBuf = Buffer.from(a);
+  const bBuf = Buffer.from(b);
+  if (aBuf.length !== bBuf.length) {
+    // Still do a compare to avoid an early-return timing side-channel.
+    timingSafeEqual(aBuf, aBuf);
+    return false;
+  }
+  return timingSafeEqual(aBuf, bBuf);
 }
 
 // ---------- password hashing (scrypt, no extra deps) ----------
@@ -110,7 +121,7 @@ export async function attemptLogin(email: string, password: string): Promise<Ses
 
   const superEmail = getSuperAdminEmail();
   const superPass = getSuperAdminPassword();
-  if (superEmail && superPass && normalized === superEmail && password === superPass) {
+  if (superEmail && superPass && normalized === superEmail && constantTimeEqual(password, superPass)) {
     return { uid: "super", role: "super_admin", exp: 0 };
   }
 

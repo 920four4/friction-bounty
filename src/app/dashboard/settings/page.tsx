@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getDb } from "@/db";
 import { organizations } from "@/db/schema";
 import { requireOrgOwner } from "@/lib/auth";
+import { widgetBaseUrl } from "@/lib/url";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +50,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
 
   if (!org) redirect("/dashboard");
 
-  const widgetSrc = `<script src="https://friction-bounty.vercel.app/widget.js" data-key="${org.apiKey}" async></script>`;
+  const widgetSrc = `<script src="${widgetBaseUrl()}/widget.js" data-key="${org.apiKey}" async></script>`;
 
   return (
     <main className="max-w-4xl mx-auto px-4 md:px-8 py-8 space-y-6">

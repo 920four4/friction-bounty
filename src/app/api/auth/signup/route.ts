@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { organizations, users } from "@/db/schema";
 import { generateApiKey, generateSlug, hashPassword, setSession } from "@/lib/auth";
+import { ipRateLimit } from "@/lib/rate-limit";
 
 const schema = z.object({
   name: z.string().min(1).max(255),
@@ -28,6 +29,20 @@ export async function POST(request: NextRequest) {
 
   const { name, email, password, orgName, websiteUrl } = parsed.data;
   const normalizedEmail = email.trim().toLowerCase();
+
+  const { limited } = await ipRateLimit({
+    request,
+    bucket: "signup",
+    limit: 5,
+    windowMs: 60 * 60 * 1000,
+    emailHint: normalizedEmail,
+  });
+  if (limited) {
+    return NextResponse.json(
+      { error: "Too many signup attempts from this IP. Try again later." },
+      { status: 429 }
+    );
+  }
 
   const db = getDb();
 

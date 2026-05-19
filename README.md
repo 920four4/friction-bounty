@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Friction Bounty
 
-## Getting Started
+A hosted widget + dashboard that lets your end-users submit bug reports from
+your site and lets you reward them with Stripe customer credit or promo codes.
 
-First, run the development server:
+**Stack**: Next.js 16 App Router · React 19 · Drizzle ORM · Neon Postgres ·
+Stripe (per-org, restricted keys) · Resend · Vercel Blob · Tailwind 4.
+
+## Local dev
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+vercel link               # one-time, links to the friction-bounty project
+vercel env pull .env.local
+npm run dev               # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+First-run migrations:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Sign in as super-admin (`SUPER_ADMIN_EMAIL` + `SUPER_ADMIN_PASSWORD`) and
+   POST `/api/admin/migrate`, or
+2. Temporarily set `MIGRATE_ENABLED=1` and use the password form at
+   `/migrate`. Turn the flag off when done.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Required env vars
 
-## Learn More
+| Var | Where | Purpose |
+|---|---|---|
+| `DATABASE_URL`, `DATABASE_URL_UNPOOLED` | Neon (auto) | Postgres |
+| `SESSION_SECRET` | manual | ≥32 random bytes, HMAC session signer |
+| `SUPER_ADMIN_EMAIL`, `SUPER_ADMIN_PASSWORD` | manual | Bootstrap super-admin |
+| `RESEND_API_KEY`, `RESEND_FROM_EMAIL` | manual | Transactional email |
+| `APP_URL`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_WIDGET_URL` | manual | Canonical URLs in emails + install snippets |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob (auto) | Screenshot storage |
+| `MIGRATE_ENABLED` | manual, optional | Allow password-based `/migrate` access |
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`git push` to `main` deploys to production via Vercel.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## License
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Proprietary — © 920four.

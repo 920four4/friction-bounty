@@ -6,6 +6,12 @@ import { getDb } from "@/db";
 import { organizations, submissions, rateLimitLog, users } from "@/db/schema";
 import { corsPreflight, withCors } from "@/lib/cors";
 import { sendNewSubmissionToOwner, sendSubmissionReceiptToReporter } from "@/lib/email";
+import { appBaseUrlFromRequest } from "@/lib/url";
+
+const httpUrl = z
+  .string()
+  .url()
+  .refine((u) => /^https?:\/\//i.test(u), { message: "Only http(s) URLs are allowed" });
 
 const submissionSchema = z.object({
   apiKey: z.string().min(1),
@@ -14,8 +20,8 @@ const submissionSchema = z.object({
   issueType: z.enum(["bug", "ux_confusion", "feature_request"]),
   title: z.string().min(1).max(255),
   description: z.string().min(10),
-  pageUrl: z.string().url(),
-  screenshotUrl: z.string().url().optional(),
+  pageUrl: httpUrl,
+  screenshotUrl: httpUrl.optional(),
   browser: z.string().optional(),
   os: z.string().optional(),
   viewportWidth: z.number().optional(),
@@ -159,13 +165,4 @@ export async function POST(request: NextRequest) {
     },
     { status: 201 }
   ));
-}
-
-function appBaseUrlFromRequest(request: NextRequest): string {
-  const explicit = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL;
-  if (explicit) return explicit.replace(/\/$/, "");
-  // Fall back to the request's own origin (works on Vercel preview + prod)
-  const proto = request.headers.get("x-forwarded-proto") || "https";
-  const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
-  return host ? `${proto}://${host}` : "https://friction-bounty.vercel.app";
 }

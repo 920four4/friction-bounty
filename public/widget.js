@@ -540,17 +540,20 @@
 
     Promise.resolve().then(function() {
       if (!state.finalDataUrl) return null;
-      return fetch(API_BASE + '/api/upload/presigned', { method: 'POST' })
-        .then(function(r) { return r.json(); })
-        .then(function(json) {
-          return fetch(state.finalDataUrl).then(function(r) { return r.blob(); }).then(function(blob) {
-            return fetch(json.uploadUrl, {
-              method: 'PUT',
-              body: blob,
-              headers: { 'Content-Type': 'image/png' },
-            }).then(function() { return json.publicUrl; });
-          });
+      return fetch(state.finalDataUrl).then(function(r) { return r.blob(); }).then(function(blob) {
+        var fd = new FormData();
+        fd.append('file', blob, 'screenshot.png');
+        return fetch(API_BASE + '/api/upload', {
+          method: 'POST',
+          headers: { 'x-fb-api-key': API_KEY },
+          body: fd,
+        }).then(function(r) {
+          if (!r.ok) throw new Error('Screenshot upload failed');
+          return r.json();
+        }).then(function(json) {
+          return json.url;
         });
+      });
     }).then(function(screenshotUrl) {
       var ctx = getPageContext();
       return fetch(API_BASE + '/api/submit', {

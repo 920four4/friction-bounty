@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { widgetBaseUrl } from "@/lib/url";
 
 export default function Home() {
+  const widgetSrc = `${widgetBaseUrl()}/widget.js`;
   return (
     <main className="min-h-screen">
       {/* Top bar */}
@@ -9,6 +11,7 @@ export default function Home() {
           <Link href="/" className="font-mono font-bold uppercase text-sm">Friction Bounty</Link>
           <div className="flex items-center gap-3">
             <a href="#how" className="font-mono text-sm uppercase hidden md:inline hover:underline">How it works</a>
+            <Link href="/pricing" className="font-mono text-sm uppercase hidden md:inline hover:underline">Pricing</Link>
             <a href="#install" className="font-mono text-sm uppercase hidden md:inline hover:underline">Install</a>
             <Link href="/login" className="font-mono text-sm uppercase hover:underline">Log in</Link>
             <Link href="/signup" className="brutal-btn-black text-sm">Start free</Link>
@@ -122,7 +125,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-6">
             <div className="brutal-box-white p-6 bg-white">
               <p className="font-mono text-xs uppercase mb-3 text-gray-500">Any web app</p>
-              <pre className="brutal-box-sm p-4 font-mono text-xs bg-gray-900 text-green-400 overflow-x-auto whitespace-pre-wrap break-all">{`<script src="https://friction-bounty.vercel.app/widget.js"
+              <pre className="brutal-box-sm p-4 font-mono text-xs bg-gray-900 text-green-400 overflow-x-auto whitespace-pre-wrap break-all">{`<script src="${widgetSrc}"
         data-key="fb_pk_yourkey..."
         async></script>`}</pre>
               <p className="text-sm text-gray-600 mt-3">Drop in before <code className="bg-gray-100 px-1">&lt;/body&gt;</code>. Works in React, Next.js, Vue, plain HTML — anywhere JS runs.</p>
@@ -163,7 +166,11 @@ export default function Home() {
       <footer className="bg-gray-100 border-t-4 border-black">
         <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row justify-between gap-3">
           <p className="font-mono text-sm text-gray-600">Friction Bounty — built by 920four</p>
-          <div className="flex gap-4 font-mono text-sm text-gray-600">
+          <div className="flex flex-wrap gap-4 font-mono text-sm text-gray-600">
+            <Link href="/pricing">Pricing</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/privacy">Privacy</Link>
+            <a href="mailto:hi@frictionbounty.app">Contact</a>
             <Link href="/login">Log in</Link>
             <Link href="/signup">Sign up</Link>
           </div>
