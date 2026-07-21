@@ -43,7 +43,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-white">
+      <body className="min-h-screen" style={{ background: "#faf9f5" }}>
         {children}
       </body>
     </html>
