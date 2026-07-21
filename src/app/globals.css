@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -26,7 +26,7 @@
   --lp-line: #0a0a0a;
   --lp-shadow: 6px 6px 0 #0a0a0a;
   --lp-shadow-sm: 3px 3px 0 #0a0a0a;
-  --lp-font-display: "Syne", "Inter", system-ui, sans-serif;
+  --lp-font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
   --lp-font-mono: "IBM Plex Mono", ui-monospace, monospace;
   --lp-font-body: "Inter", system-ui, sans-serif;
 }
@@ -392,10 +392,10 @@ body {
 
 .lp-h1 {
   font-family: var(--lp-font-display);
-  font-weight: 800;
+  font-weight: 700;
   font-size: clamp(2.6rem, 7vw, 4.6rem);
-  line-height: 0.98;
-  letter-spacing: -0.035em;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
   margin: 0 0 1.35rem;
   text-wrap: balance;
 }
@@ -867,10 +867,10 @@ body {
 
 .lp-h2 {
   font-family: var(--lp-font-display);
-  font-weight: 800;
+  font-weight: 700;
   font-size: clamp(2rem, 4.5vw, 3.15rem);
-  line-height: 1.02;
-  letter-spacing: -0.03em;
+  line-height: 1.06;
+  letter-spacing: -0.025em;
   margin: 0 0 1.25rem;
   text-wrap: balance;
 }
@@ -933,7 +933,7 @@ body {
 .lp-trade-big {
   margin: 0 0 0.4rem;
   font-family: var(--lp-font-display);
-  font-weight: 800;
+  font-weight: 700;
   font-size: 1.55rem;
   letter-spacing: -0.02em;
 }
@@ -1372,7 +1372,7 @@ body {
 .lp-who-card h3 {
   margin: 0;
   font-family: var(--lp-font-display);
-  font-weight: 800;
+  font-weight: 700;
   font-size: 1.55rem;
   letter-spacing: -0.025em;
   line-height: 1.1;
@@ -1434,7 +1434,7 @@ body {
 .lp-stat-big {
   margin: 0 0 0.4rem;
   font-family: var(--lp-font-display);
-  font-weight: 800;
+  font-weight: 700;
   font-size: clamp(2rem, 4vw, 2.75rem);
   line-height: 1;
   letter-spacing: -0.03em;
