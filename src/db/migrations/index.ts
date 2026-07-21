@@ -166,7 +166,21 @@ ALTER TABLE organizations ADD COLUMN IF NOT EXISTS monthly_budget NUMERIC(10, 2)
 COMMIT;
 `;
 
+// Older production DBs created submissions before the full multi-tenant
+// schema. CREATE TABLE IF NOT EXISTS does not add missing columns, so
+// Drizzle SELECTs that expect the full schema fail at runtime.
+export const migration_0003_submissions_columns = /* sql */ `
+BEGIN;
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS user_id VARCHAR(255);
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS session_id VARCHAR(255);
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS reward_type VARCHAR(50) DEFAULT 'stripe_credit';
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS reviewer_notes TEXT;
+ALTER TABLE submissions ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL DEFAULT NOW();
+COMMIT;
+`;
+
 export const migrations: Array<{ name: string; sql: string }> = [
   { name: "0001_multitenant", sql: migration_0001_multitenant },
   { name: "0002_monthly_budget", sql: migration_0002_monthly_budget },
+  { name: "0003_submissions_columns", sql: migration_0003_submissions_columns },
 ];
