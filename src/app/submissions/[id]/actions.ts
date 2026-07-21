@@ -7,7 +7,7 @@ import { getDb } from "@/db";
 import { organizations, submissionMessages, submissions } from "@/db/schema";
 import { getCurrentUser, requireSession } from "@/lib/auth";
 import { reporterReplyTemplate, sendEmail } from "@/lib/email";
-import { getStripeForOrg } from "@/lib/stripe";
+import { connectOpts, getOrgStripeClient } from "@/lib/stripe";
 import { checkBudgetForReward } from "@/lib/budget";
 
 async function loadOwnedSubmission(id: string) {
@@ -219,29 +219,43 @@ type RewardSubmission = {
   stripeCustomerId: string | null;
 };
 
-async function deliverCreditReward(
-  submission: RewardSubmission,
-  org: { id: string; stripeSecretKey: string | null },
-) {
-  const stripe = getStripeForOrg(org.stripeSecretKey);
-  if (!stripe) {
-    throw new Error("Stripe is not configured for this organization. Add a Stripe Secret Key in Settings.");
+type RewardOrg = {
+  id: string;
+  stripeSecretKey: string | null;
+  stripeAccountId: string | null;
+  stripeChargesEnabled: boolean;
+};
+
+async function deliverCreditReward(submission: RewardSubmission, org: RewardOrg) {
+  const client = getOrgStripeClient(org);
+  if (!client.stripe || !client.ready) {
+    throw new Error(
+      "Stripe is not connected. Open Account → Connect Stripe (one click, no API keys).",
+    );
   }
+  const stripe = client.stripe;
+  const scoped = connectOpts(client);
 
   const amount = Math.round(parseFloat(submission.bountyAmount) * 100);
   const currency = "usd";
 
   let customerId = submission.stripeCustomerId;
   if (!customerId && submission.email) {
-    const customers = await stripe.customers.list({ email: submission.email, limit: 1 });
+    const customers = await stripe.customers.list(
+      { email: submission.email, limit: 1 },
+      scoped,
+    );
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
     } else {
-      const customer = await stripe.customers.create({
-        email: submission.email,
-        name: submission.name || undefined,
-        metadata: { bounty_submission_id: submission.id, source: "friction_bounty" },
-      });
+      const customer = await stripe.customers.create(
+        {
+          email: submission.email,
+          name: submission.name || undefined,
+          metadata: { bounty_submission_id: submission.id, source: "friction_bounty" },
+        },
+        scoped,
+      );
       customerId = customer.id;
     }
   }
@@ -256,7 +270,7 @@ async function deliverCreditReward(
       description: `Bug bounty reward: ${submission.title}`,
       metadata: { bounty_submission_id: submission.id },
     },
-    { idempotencyKey: `bounty-${submission.id}` },
+    { ...scoped, idempotencyKey: `bounty-${submission.id}` },
   );
 
   const db = getDb();
@@ -267,12 +281,16 @@ async function deliverCreditReward(
 
 async function deliverCouponReward(
   submission: RewardSubmission,
-  org: { id: string; stripeSecretKey: string | null },
+  org: RewardOrg,
 ): Promise<string> {
-  const stripe = getStripeForOrg(org.stripeSecretKey);
-  if (!stripe) {
-    throw new Error("Stripe is not configured for this organization. Add a Stripe Secret Key in Settings.");
+  const client = getOrgStripeClient(org);
+  if (!client.stripe || !client.ready) {
+    throw new Error(
+      "Stripe is not connected. Open Account → Connect Stripe (one click, no API keys).",
+    );
   }
+  const stripe = client.stripe;
+  const scoped = connectOpts(client);
 
   const amount = Math.round(parseFloat(submission.bountyAmount) * 100);
   const currency = "usd";
@@ -287,7 +305,7 @@ async function deliverCouponReward(
       max_redemptions: 1,
       metadata: { bounty_submission_id: submission.id, source: "friction_bounty" },
     },
-    { idempotencyKey: `bounty-coupon-${submission.id}` },
+    { ...scoped, idempotencyKey: `bounty-coupon-${submission.id}` },
   );
 
   const code = `BOUNTY-${submission.id.slice(0, 8).toUpperCase()}`;
@@ -299,7 +317,7 @@ async function deliverCouponReward(
       expires_at: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
       metadata: { bounty_submission_id: submission.id },
     },
-    { idempotencyKey: `bounty-promo-${submission.id}` },
+    { ...scoped, idempotencyKey: `bounty-promo-${submission.id}` },
   );
 
   return promo.code;

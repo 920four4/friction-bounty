@@ -205,7 +205,9 @@ export default async function SubmissionDetailPage({
             <div className="brutal-box p-6 bg-yellow-50">
               <h2 className="font-mono text-xs uppercase mb-1">Approved</h2>
               <p className="text-sm">Reward not yet delivered. {submission.rewardError && <span className="text-red-600">Stripe error: {submission.rewardError}</span>}</p>
-              <p className="text-xs text-gray-500 mt-2">Configure Stripe in Settings, then re-approve from the API or contact support.</p>
+              <p className="text-xs text-gray-500 mt-2">
+                Connect Stripe in <a className="underline" href="/dashboard/account">Account</a> (one click, no API keys), then try approving again.
+              </p>
             </div>
           )}
 

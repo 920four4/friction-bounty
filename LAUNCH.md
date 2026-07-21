@@ -49,6 +49,18 @@ Set these for **Production** (and Preview if you want previews to work end-to-en
 
 If unset, install snippets fall back to `https://frictionbounty.app` via `src/lib/url.ts`.
 
+### Stripe platform (Connect + SaaS billing)
+Merchants **never paste API keys**. They connect via Stripe-hosted Connect Express. You need a platform Stripe account.
+
+| Var | Value / notes |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | Platform secret key (`sk_live_…` / `sk_test_…`) — enables Connect onboarding + reward issuance on connected accounts |
+| `STRIPE_WEBHOOK_SECRET` | Webhook signing secret for `/api/stripe/webhook` (billing events) |
+| `STRIPE_PRICE_PRO` | Price id for Pro plan (`price_…`) — used by Checkout upgrade |
+
+In Stripe Dashboard → Connect: enable Express accounts.  
+Webhook events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`.
+
 ### Optional / operational
 | Var | Value / notes |
 | --- | --- |

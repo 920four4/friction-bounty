@@ -179,8 +179,22 @@ ALTER TABLE submissions ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP NOT NULL D
 COMMIT;
 `;
 
+// Stripe Connect + SaaS billing fields. Idempotent.
+export const migration_0004_connect_billing = /* sql */ `
+BEGIN;
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS stripe_account_id TEXT;
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS stripe_charges_enabled BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS stripe_details_submitted BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS plan VARCHAR(20) NOT NULL DEFAULT 'free';
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS billing_customer_id TEXT;
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS billing_subscription_id TEXT;
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS billing_status VARCHAR(30) NOT NULL DEFAULT 'none';
+COMMIT;
+`;
+
 export const migrations: Array<{ name: string; sql: string }> = [
   { name: "0001_multitenant", sql: migration_0001_multitenant },
   { name: "0002_monthly_budget", sql: migration_0002_monthly_budget },
   { name: "0003_submissions_columns", sql: migration_0003_submissions_columns },
+  { name: "0004_connect_billing", sql: migration_0004_connect_billing },
 ];

@@ -96,13 +96,12 @@ export default async function DashboardInbox({
         {!hasAny ? (
           <div className="brutal-box p-12 text-center">
             <p className="font-mono text-lg mb-2">No submissions yet</p>
-            <p className="text-gray-500 mb-6">
-              Install the widget on your site and bug reports will land here.
-              The setup guide walks you through it in 5 minutes.
+            <p className="text-gray-500 mb-6 max-w-md mx-auto">
+              Paste one script tag, connect Stripe (no API keys), and reports show up here.
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
-              <Link href="/dashboard/getting-started" className="brutal-btn-black inline-block">Setup guide →</Link>
-              <Link href="/dashboard/settings" className="brutal-btn inline-block">Just give me the snippet</Link>
+              <Link href="/dashboard/getting-started" className="brutal-btn-black inline-block">Start setup →</Link>
+              <Link href="/dashboard/account" className="brutal-btn inline-block">Connect Stripe</Link>
             </div>
           </div>
         ) : list.length === 0 ? (

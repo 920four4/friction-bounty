@@ -1,10 +1,12 @@
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getDb } from "@/db";
 import { organizations } from "@/db/schema";
 import { requireOrgOwner } from "@/lib/auth";
 import { widgetBaseUrl } from "@/lib/url";
+import { orgCanIssueRewards } from "@/lib/stripe";
 import { CopyButton, CopyField } from "@/components/copy-button";
 
 export const dynamic = "force-dynamic";
@@ -16,12 +18,10 @@ async function saveSettings(formData: FormData) {
 
   const defaultBountyAmount = (formData.get("defaultBountyAmount") as string || "10.00").trim();
   const monthlyBudgetRaw = (formData.get("monthlyBudget") as string || "").trim();
-  // Blank = no cap (unlimited). A parseable positive number sets the cap.
   const monthlyBudget = monthlyBudgetRaw === "" ? null : monthlyBudgetRaw;
   const widgetPrimaryColor = (formData.get("widgetPrimaryColor") as string || "#FFE100").trim();
   const widgetPosition = (formData.get("widgetPosition") as string || "bottom-right").trim();
   const widgetWelcomeMessage = (formData.get("widgetWelcomeMessage") as string || "").trim();
-  const stripeSecretKey = (formData.get("stripeSecretKey") as string || "").trim();
   const websiteUrl = (formData.get("websiteUrl") as string || "").trim();
   const orgName = (formData.get("orgName") as string || "").trim();
   const notificationEmail = (formData.get("notificationEmail") as string || "").trim();
@@ -38,7 +38,6 @@ async function saveSettings(formData: FormData) {
       websiteUrl: websiteUrl || null,
       notificationEmail: notificationEmail || null,
       notifyOnSubmission,
-      ...(stripeSecretKey ? { stripeSecretKey } : {}),
       updatedAt: new Date(),
     })
     .where(eq(organizations.id, orgId));
@@ -56,45 +55,52 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   if (!org) redirect("/dashboard");
 
   const widgetSrc = `<script src="${widgetBaseUrl()}/widget.js" data-key="${org.apiKey}" async></script>`;
+  const stripeReady = orgCanIssueRewards(org);
 
   return (
-    <main className="max-w-4xl mx-auto px-4 md:px-8 py-8 space-y-6">
+    <main className="max-w-3xl mx-auto px-4 md:px-8 py-8 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold font-mono uppercase">Settings</h1>
+        <p className="font-mono text-xs uppercase text-gray-500 mb-1">Settings</p>
+        <h1 className="text-3xl font-bold font-mono uppercase">Widget &amp; org</h1>
+        <p className="text-sm text-gray-600 mt-1">
+          For Stripe payouts and plan billing, go to{" "}
+          <Link href="/dashboard/account" className="underline">Account</Link>.
+        </p>
       </div>
 
       {saved && (
         <div className="brutal-box-sm bg-green-100 px-4 py-2 font-mono text-sm">Settings saved.</div>
       )}
 
-      {/* Install snippet */}
-      <section className="brutal-box p-6">
-        <h2 className="font-mono font-bold uppercase mb-4">Install the widget</h2>
-        <p className="text-gray-700 mb-4 text-sm">
-          Add this <strong>once</strong> to your app, just before <code className="bg-gray-100 px-1">&lt;/body&gt;</code>. The widget auto-loads its config from your account.
-        </p>
-        <div className="mb-3">
-          <CopyField value={widgetSrc} />
-        </div>
-
-        <p className="text-xs text-gray-500 font-mono mt-2">
-          Works in React, Next.js, Vue, Svelte, plain HTML — anywhere JavaScript runs in the browser.
-        </p>
-
-        <div className="mt-4 brutal-box-sm bg-gray-50 p-3 text-xs font-mono text-gray-600">
-          <strong className="block mb-1">On Shopify?</strong>
-          A native Shopify app (with gift cards via Shopify discount API, no Stripe key required) is in development. Email <strong>hi@frictionbounty.app</strong> for early access.
-        </div>
-
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-gray-500 font-mono">
-          <span>Your API key:</span>
+      {/* Install */}
+      <section className="brutal-box p-6 space-y-3">
+        <h2 className="font-mono font-bold uppercase">Install snippet</h2>
+        <CopyField value={widgetSrc} />
+        <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 font-mono">
+          <span>API key:</span>
           <span className="bg-gray-100 px-2 py-1 break-all">{org.apiKey}</span>
           <CopyButton value={org.apiKey} label="Copy key" />
         </div>
       </section>
 
+      {/* Stripe status — no keys */}
+      <section className="brutal-box p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="font-mono font-bold uppercase">Reward payouts</h2>
+            <p className="text-sm text-gray-600 mt-1">
+              {stripeReady
+                ? "Stripe is connected. Rewards issue on your account."
+                : "Connect Stripe to issue credits & promo codes — no API keys to paste."}
+            </p>
+          </div>
+          <Link href="/dashboard/account" className="brutal-btn-black text-sm">
+            {stripeReady ? "Manage in Account →" : "Connect Stripe →"}
+          </Link>
+        </div>
+      </section>
+
       <form action={saveSettings} className="space-y-6">
-        {/* Org */}
         <section className="brutal-box p-6">
           <h2 className="font-mono font-bold uppercase mb-4">Organization</h2>
           <div className="grid md:grid-cols-2 gap-4">
@@ -103,7 +109,6 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
           </div>
         </section>
 
-        {/* Bounty */}
         <section className="brutal-box p-6">
           <h2 className="font-mono font-bold uppercase mb-4">Bounty &amp; budget</h2>
           <div className="grid md:grid-cols-2 gap-4">
@@ -120,25 +125,21 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
                 className="brutal-input"
               />
               <p className="text-xs text-gray-500 mt-1 font-mono">
-                Hard cap on rewards paid per calendar month. Approvals that would exceed it are blocked. Leave blank for no limit.
+                Hard cap per calendar month. Leave blank for unlimited.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Notifications */}
         <section className="brutal-box p-6">
           <h2 className="font-mono font-bold uppercase mb-4">Notifications</h2>
-          <p className="text-gray-700 text-sm mb-4">
-            We email you whenever a new report lands. Reporters automatically get a receipt and a reply when you respond.
-          </p>
           <div className="grid md:grid-cols-2 gap-4">
             <Field
               label="Notification email"
               name="notificationEmail"
               type="email"
               defaultValue={org.notificationEmail ?? ""}
-              placeholder="bugs@yourstore.com (defaults to your account email)"
+              placeholder="bugs@yourstore.com"
             />
             <div className="flex items-end">
               <label className="flex items-center gap-2 font-mono text-sm">
@@ -154,21 +155,6 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
           </div>
         </section>
 
-        {/* Stripe */}
-        <section className="brutal-box p-6">
-          <h2 className="font-mono font-bold uppercase mb-4">Stripe (rewards)</h2>
-          <p className="text-gray-700 text-sm mb-4">
-            Rewards are issued on <strong>your</strong> Stripe account as customer credit. Paste a restricted key with permission to read/write Customers and Coupons.
-          </p>
-          <Field
-            label={org.stripeSecretKey ? "Replace Stripe Secret Key" : "Stripe Secret Key"}
-            name="stripeSecretKey"
-            type="password"
-            placeholder={org.stripeSecretKey ? "•••••••• (leave blank to keep current)" : "rk_live_..."}
-          />
-        </section>
-
-        {/* Widget look */}
         <section className="brutal-box p-6">
           <h2 className="font-mono font-bold uppercase mb-4">Widget appearance</h2>
           <div className="grid md:grid-cols-2 gap-4">

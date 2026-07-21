@@ -58,7 +58,8 @@ export default async function OrgDetailPage({ params }: { params: Promise<{ id: 
         <KV k="API key" v={org.apiKey} mono />
         <KV k="Slug" v={org.slug} />
         <KV k="Default bounty" v={`$${org.defaultBountyAmount}`} />
-        <KV k="Stripe configured" v={org.stripeSecretKey ? "yes" : "no"} />
+        <KV k="Stripe Connect" v={org.stripeAccountId ? `${org.stripeAccountId}${org.stripeChargesEnabled ? " (ready)" : " (pending)"}` : (org.stripeSecretKey ? "legacy key" : "no")} />
+        <KV k="Plan" v={`${org.plan} / ${org.billingStatus}`} />
         <KV k="Created" v={new Date(org.createdAt).toLocaleString()} />
         <KV k="Status" v={org.isActive ? "active" : "disabled"} />
       </section>

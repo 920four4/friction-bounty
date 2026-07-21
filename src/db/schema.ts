@@ -10,8 +10,20 @@ export const organizations = pgTable("organizations", {
   // Public widget key — appears in <script> tags. Anyone can submit using it.
   apiKey: varchar("api_key", { length: 64 }).notNull(),
 
-  // Per-org Stripe (merchant-managed) for issuing rewards on their account.
+  // Legacy: raw restricted key (deprecated — prefer Connect). Never collect in UI.
   stripeSecretKey: text("stripe_secret_key"),
+
+  // Stripe Connect (preferred): merchant connects via Stripe-hosted onboarding.
+  // We store only the account id (acct_…), never their secret keys.
+  stripeAccountId: text("stripe_account_id"),
+  stripeChargesEnabled: boolean("stripe_charges_enabled").notNull().default(false),
+  stripeDetailsSubmitted: boolean("stripe_details_submitted").notNull().default(false),
+
+  // SaaS billing (they pay *us* for Friction Bounty)
+  plan: varchar("plan", { length: 20 }).notNull().default("free"), // free | pro
+  billingCustomerId: text("billing_customer_id"),
+  billingSubscriptionId: text("billing_subscription_id"),
+  billingStatus: varchar("billing_status", { length: 30 }).notNull().default("none"), // none | active | trialing | past_due | canceled
 
   // Where to send "new submission" notifications. Falls back to owner's email.
   notificationEmail: varchar("notification_email", { length: 255 }),
