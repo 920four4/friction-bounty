@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getDb } from "@/db";
 import { organizations, submissions } from "@/db/schema";
 import { requireOrgOwner } from "@/lib/auth";
+import { CopyField } from "@/components/copy-button";
 
 export const dynamic = "force-dynamic";
 
@@ -91,6 +92,7 @@ export default async function GettingStartedPage() {
         </p>
         <ul className="list-disc pl-5 text-sm space-y-1">
           <li><strong>Default bounty amount</strong> — what reporters earn for an approved report. You can override per-submission when approving.</li>
+          <li><strong>Monthly budget</strong> — an optional hard cap on total rewards per calendar month. Once you hit it, approvals are blocked until next month or you raise it. Spend shows live on your inbox.</li>
           <li><strong>Widget color &amp; position</strong> — match your brand.</li>
           <li><strong>Welcome message</strong> — what the user sees when they open the badge.</li>
           <li><strong>Notification email</strong> — where new-report alerts go. Defaults to your account email.</li>
@@ -207,7 +209,5 @@ function Step({ n, title, status, children }: { n: number; title: string; status
 }
 
 function Snippet({ code }: { code: string }) {
-  return (
-    <pre className="brutal-box-sm p-4 font-mono text-xs bg-gray-900 text-green-400 overflow-x-auto whitespace-pre-wrap break-all">{code}</pre>
-  );
+  return <CopyField value={code} />;
 }

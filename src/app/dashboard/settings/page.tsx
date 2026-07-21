@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getDb } from "@/db";
 import { organizations } from "@/db/schema";
 import { requireOrgOwner } from "@/lib/auth";
+import { CopyButton, CopyField } from "@/components/copy-button";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,9 @@ async function saveSettings(formData: FormData) {
   const db = getDb();
 
   const defaultBountyAmount = (formData.get("defaultBountyAmount") as string || "10.00").trim();
+  const monthlyBudgetRaw = (formData.get("monthlyBudget") as string || "").trim();
+  // Blank = no cap (unlimited). A parseable positive number sets the cap.
+  const monthlyBudget = monthlyBudgetRaw === "" ? null : monthlyBudgetRaw;
   const widgetPrimaryColor = (formData.get("widgetPrimaryColor") as string || "#FFE100").trim();
   const widgetPosition = (formData.get("widgetPosition") as string || "bottom-right").trim();
   const widgetWelcomeMessage = (formData.get("widgetWelcomeMessage") as string || "").trim();
@@ -26,6 +30,7 @@ async function saveSettings(formData: FormData) {
     .set({
       name: orgName || undefined,
       defaultBountyAmount,
+      monthlyBudget,
       widgetPrimaryColor,
       widgetPosition,
       widgetWelcomeMessage: widgetWelcomeMessage || undefined,
@@ -67,7 +72,9 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         <p className="text-gray-700 mb-4 text-sm">
           Add this <strong>once</strong> to your app, just before <code className="bg-gray-100 px-1">&lt;/body&gt;</code>. The widget auto-loads its config from your account.
         </p>
-        <pre className="brutal-box-sm p-4 font-mono text-xs bg-gray-900 text-green-400 overflow-x-auto whitespace-pre-wrap break-all mb-3">{widgetSrc}</pre>
+        <div className="mb-3">
+          <CopyField value={widgetSrc} />
+        </div>
 
         <p className="text-xs text-gray-500 font-mono mt-2">
           Works in React, Next.js, Vue, Svelte, plain HTML — anywhere JavaScript runs in the browser.
@@ -78,8 +85,10 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
           A native Shopify app (with gift cards via Shopify discount API, no Stripe key required) is in development. Email <strong>hi@frictionbounty.app</strong> for early access.
         </div>
 
-        <div className="mt-4 text-xs text-gray-500 font-mono">
-          Your API key: <span className="bg-gray-100 px-2 py-1">{org.apiKey}</span>
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-gray-500 font-mono">
+          <span>Your API key:</span>
+          <span className="bg-gray-100 px-2 py-1 break-all">{org.apiKey}</span>
+          <CopyButton value={org.apiKey} label="Copy key" />
         </div>
       </section>
 
@@ -95,9 +104,24 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
 
         {/* Bounty */}
         <section className="brutal-box p-6">
-          <h2 className="font-mono font-bold uppercase mb-4">Bounty</h2>
+          <h2 className="font-mono font-bold uppercase mb-4">Bounty &amp; budget</h2>
           <div className="grid md:grid-cols-2 gap-4">
             <Field label="Default amount (USD)" name="defaultBountyAmount" type="number" step="0.01" defaultValue={org.defaultBountyAmount.toString()} />
+            <div>
+              <label className="brutal-label">Monthly budget (USD)</label>
+              <input
+                type="number"
+                name="monthlyBudget"
+                step="0.01"
+                min="0"
+                defaultValue={org.monthlyBudget ?? ""}
+                placeholder="No limit"
+                className="brutal-input"
+              />
+              <p className="text-xs text-gray-500 mt-1 font-mono">
+                Hard cap on rewards paid per calendar month. Approvals that would exceed it are blocked. Leave blank for no limit.
+              </p>
+            </div>
           </div>
         </section>
 
