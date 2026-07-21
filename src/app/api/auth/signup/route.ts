@@ -30,45 +30,57 @@ export async function POST(request: NextRequest) {
   const { name, email, password, orgName, websiteUrl } = parsed.data;
   const normalizedEmail = email.trim().toLowerCase();
 
-  const { limited } = await ipRateLimit({
-    request,
-    bucket: "signup",
-    limit: 5,
-    windowMs: 60 * 60 * 1000,
-    emailHint: normalizedEmail,
-  });
-  if (limited) {
-    return NextResponse.json(
-      { error: "Too many signup attempts from this IP. Try again later." },
-      { status: 429 }
-    );
+  try {
+    const { limited } = await ipRateLimit({
+      request,
+      bucket: "signup",
+      limit: 5,
+      windowMs: 60 * 60 * 1000,
+      emailHint: normalizedEmail,
+    });
+    if (limited) {
+      return NextResponse.json(
+        { error: "Too many signup attempts from this IP. Try again later." },
+        { status: 429 }
+      );
+    }
+
+    const db = getDb();
+
+    // Block duplicate accounts
+    const existing = await db.query.users.findFirst({ where: eq(users.email, normalizedEmail) });
+    if (existing) {
+      return NextResponse.json({ error: "An account with that email already exists" }, { status: 409 });
+    }
+
+    // Create org + owner in a single chain
+    const [org] = await db.insert(organizations).values({
+      name: orgName,
+      slug: generateSlug(orgName),
+      apiKey: generateApiKey(),
+      websiteUrl: websiteUrl || null,
+    }).returning();
+
+    const [user] = await db.insert(users).values({
+      email: normalizedEmail,
+      name,
+      passwordHash: hashPassword(password),
+      role: "org_owner",
+      orgId: org.id,
+    }).returning();
+
+    await setSession({ uid: user.id, role: "org_owner", oid: org.id });
+
+    return NextResponse.json({ ok: true, redirect: "/dashboard/getting-started" });
+  } catch (err) {
+    console.error("[signup] failed", err);
+    const message = err instanceof Error ? err.message : "Signup failed";
+    // Surface schema-mismatch / missing-column issues clearly in non-prod;
+    // keep a friendly message in production while still logging the real cause.
+    const friendly =
+      /column .* does not exist|relation .* does not exist/i.test(message)
+        ? "Database is missing a required schema update. Run /migrate as super admin, then try again."
+        : "Something went wrong creating your account. Please try again.";
+    return NextResponse.json({ error: friendly }, { status: 500 });
   }
-
-  const db = getDb();
-
-  // Block duplicate accounts
-  const existing = await db.query.users.findFirst({ where: eq(users.email, normalizedEmail) });
-  if (existing) {
-    return NextResponse.json({ error: "An account with that email already exists" }, { status: 409 });
-  }
-
-  // Create org + owner in a single chain
-  const [org] = await db.insert(organizations).values({
-    name: orgName,
-    slug: generateSlug(orgName),
-    apiKey: generateApiKey(),
-    websiteUrl: websiteUrl || null,
-  }).returning();
-
-  const [user] = await db.insert(users).values({
-    email: normalizedEmail,
-    name,
-    passwordHash: hashPassword(password),
-    role: "org_owner",
-    orgId: org.id,
-  }).returning();
-
-  await setSession({ uid: user.id, role: "org_owner", oid: org.id });
-
-  return NextResponse.json({ ok: true, redirect: "/dashboard/getting-started" });
 }

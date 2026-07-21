@@ -24,7 +24,13 @@ export default function SignupPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password, orgName, websiteUrl }),
       });
-      const json = await res.json();
+      let json: { error?: string; redirect?: string } = {};
+      try {
+        json = await res.json();
+      } catch {
+        setError(res.ok ? "Unexpected response" : `Signup failed (${res.status})`);
+        return;
+      }
       if (!res.ok) {
         setError(json.error || "Signup failed");
         return;
@@ -32,7 +38,7 @@ export default function SignupPage() {
       router.push(json.redirect || "/dashboard");
       router.refresh();
     } catch {
-      setError("Something went wrong");
+      setError("Network error — check your connection and try again.");
     } finally {
       setLoading(false);
     }
