@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS organizations (
   notify_on_submission BOOLEAN NOT NULL DEFAULT TRUE,
   default_bounty_amount NUMERIC(10, 2) NOT NULL DEFAULT 10.00,
   bounty_currency VARCHAR(3) NOT NULL DEFAULT 'USD',
+  monthly_budget NUMERIC(10, 2),
   widget_primary_color VARCHAR(7) NOT NULL DEFAULT '#FFE100',
   widget_position VARCHAR(20) NOT NULL DEFAULT 'bottom-right',
   widget_welcome_message TEXT NOT NULL DEFAULT 'Found an issue? Report it and earn rewards!',
@@ -157,6 +158,15 @@ DROP TABLE IF EXISTS app_settings;
 COMMIT;
 `;
 
+// Adds the monthly spend cap to existing organizations tables.
+// Idempotent — ADD COLUMN IF NOT EXISTS is a no-op once applied.
+export const migration_0002_monthly_budget = /* sql */ `
+BEGIN;
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS monthly_budget NUMERIC(10, 2);
+COMMIT;
+`;
+
 export const migrations: Array<{ name: string; sql: string }> = [
   { name: "0001_multitenant", sql: migration_0001_multitenant },
+  { name: "0002_monthly_budget", sql: migration_0002_monthly_budget },
 ];

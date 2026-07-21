@@ -68,6 +68,7 @@ export default function Home() {
               <Bullet>You decide: approve &amp; reward, decline as spam, or reply for more info</Bullet>
               <Bullet>Rewards: Stripe customer credit (auto-applied at next checkout) <em>or</em> a single-use promo code</Bullet>
               <Bullet>Set bounty amounts per submission — a $20 credit beats a churned LTV</Bullet>
+              <Bullet>Cap spend with a monthly budget — approvals stop the second you hit it</Bullet>
             </ul>
             <Link href="/signup" className="brutal-btn-black inline-block mt-6">Create your inbox →</Link>
           </div>
@@ -111,6 +112,7 @@ export default function Home() {
             <Feature title="Spam control" body="Rate-limited per IP per org. You always review before any money moves. Decline-as-spam closes the loop with the reporter." />
             <Feature title="Per-org Stripe" body="Rewards land on your Stripe account, not ours. We never touch payout money — just trigger the credit or generate a promo code." />
             <Feature title="Configurable widget" body="Pick your color, position, welcome message, default bounty. Matches your brand without code." />
+            <Feature title="Monthly budget cap" body="Set a hard spend ceiling per month. A live meter tracks payouts; approvals block automatically once you hit the cap. Predictable costs, no surprises." />
             <Feature title="Built for ship-day" body="One JS file, no SDK, works on any web app. React, Next.js, Vue, plain HTML — all the same install." />
           </div>
         </div>
