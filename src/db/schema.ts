@@ -21,6 +21,10 @@ export const organizations = pgTable("organizations", {
   defaultBountyAmount: decimal("default_bounty_amount", { precision: 10, scale: 2 }).notNull().default("10.00"),
   bountyCurrency: varchar("bounty_currency", { length: 3 }).notNull().default("USD"),
 
+  // Monthly spend cap. NULL = no limit. Enforced against rewards delivered
+  // in the current calendar month; approvals that would exceed it are blocked.
+  monthlyBudget: decimal("monthly_budget", { precision: 10, scale: 2 }),
+
   // Widget look-and-feel
   widgetPrimaryColor: varchar("widget_primary_color", { length: 7 }).notNull().default("#FFE100"),
   widgetPosition: varchar("widget_position", { length: 20 }).notNull().default("bottom-right"),

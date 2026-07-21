@@ -8,6 +8,7 @@ import { organizations, submissionMessages, submissions } from "@/db/schema";
 import { getCurrentUser, requireSession } from "@/lib/auth";
 import { reporterReplyTemplate, sendEmail } from "@/lib/email";
 import { getStripeForOrg } from "@/lib/stripe";
+import { checkBudgetForReward } from "@/lib/budget";
 
 async function loadOwnedSubmission(id: string) {
   const session = await requireSession();
@@ -83,6 +84,13 @@ export async function approveSubmission(formData: FormData) {
   const db = getDb();
   const user = await getCurrentUser();
   const amountStr = customAmount || submission.bountyAmount.toString();
+
+  // Enforce the monthly spend cap before any money moves. Bounce back with a
+  // clear banner rather than throwing an opaque error page.
+  const budgetBlock = await checkBudgetForReward(org, parseFloat(amountStr) || 0);
+  if (budgetBlock) {
+    redirect(`/submissions/${id}?error=budget`);
+  }
 
   await db.update(submissions)
     .set({

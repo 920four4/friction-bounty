@@ -3,15 +3,23 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { asc, eq } from "drizzle-orm";
 import { getDb } from "@/db";
-import { submissions, submissionMessages } from "@/db/schema";
+import { organizations, submissions, submissionMessages } from "@/db/schema";
 import { requireSession } from "@/lib/auth";
+import { getBudgetStatus } from "@/lib/budget";
 import { approveSubmission, rejectSubmission, replyToSubmission } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function SubmissionDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function SubmissionDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
+}) {
   const session = await requireSession();
   const { id } = await params;
+  const { error } = await searchParams;
 
   const db = getDb();
   const submission = await db.query.submissions.findFirst({
@@ -23,14 +31,32 @@ export default async function SubmissionDetailPage({ params }: { params: Promise
   const isSuperAdmin = session.role === "super_admin";
   const backHref = isSuperAdmin ? `/super-admin/orgs/${submission.orgId}` : "/dashboard";
 
-  const thread = await db.query.submissionMessages.findMany({
-    where: eq(submissionMessages.submissionId, id),
-    orderBy: [asc(submissionMessages.createdAt)],
-  });
+  const [thread, org] = await Promise.all([
+    db.query.submissionMessages.findMany({
+      where: eq(submissionMessages.submissionId, id),
+      orderBy: [asc(submissionMessages.createdAt)],
+    }),
+    db.query.organizations.findFirst({ where: eq(organizations.id, submission.orgId) }),
+  ]);
+
+  const budget = org ? await getBudgetStatus(org) : null;
+  const wouldExceed =
+    budget?.budget != null &&
+    submission.status === "pending" &&
+    budget.spent + parseFloat(submission.bountyAmount) > budget.budget + 1e-9;
 
   return (
     <main className="max-w-6xl mx-auto px-4 md:px-8 py-8">
       <Link href={backHref} className="text-gray-500 hover:text-black font-mono text-sm">← Back</Link>
+
+      {error === "budget" && budget?.budget != null && (
+        <div className="brutal-box-sm mt-4 px-4 py-3 font-mono text-sm" style={{ backgroundColor: "#FFE0E0", borderColor: "#FF3300" }}>
+          <strong>Reward blocked — monthly budget reached.</strong>{" "}
+          You&rsquo;ve rewarded ${budget.spent.toFixed(2)} of your ${budget.budget.toFixed(2)} budget for {budget.monthLabel}
+          {" "}(${(budget.remaining ?? 0).toFixed(2)} left). Lower the bounty, raise the budget in{" "}
+          <Link href="/dashboard/settings" className="underline">Settings</Link>, or wait until next month.
+        </div>
+      )}
 
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-4 mb-8">
         <div className="flex items-center gap-3">
@@ -119,6 +145,16 @@ export default async function SubmissionDetailPage({ params }: { params: Promise
           {submission.status === "pending" && (
             <div className="brutal-box-yellow p-6 space-y-4">
               <h2 className="font-mono text-xs uppercase">Decision</h2>
+
+              {budget?.budget != null && (
+                <div className={"brutal-box-sm px-3 py-2 font-mono text-xs " + (wouldExceed ? "" : "bg-white")} style={wouldExceed ? { backgroundColor: "#FFE0E0", borderColor: "#FF3300" } : undefined}>
+                  {wouldExceed ? (
+                    <>⚠ ${(budget.remaining ?? 0).toFixed(2)} left in {budget.monthLabel} budget — this bounty won&rsquo;t fit. Lower it to approve.</>
+                  ) : (
+                    <>${(budget.remaining ?? 0).toFixed(2)} of ${budget.budget.toFixed(2)} left in {budget.monthLabel} budget.</>
+                  )}
+                </div>
+              )}
 
               <form action={approveSubmission} className="space-y-2">
                 <input type="hidden" name="id" value={submission.id} />
