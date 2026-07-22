@@ -56,19 +56,23 @@ export default async function DashboardInbox({
   const hasAny = all.length > 0;
 
   return (
-    <main>
-      {/* Budget meter */}
+    <div className="space-y-4 -mx-4 sm:mx-0">
+      <header className="px-4 sm:px-0">
+        <p className="dash-page-kicker">Inbox</p>
+        <h1 className="dash-page-title">Reports</h1>
+        <p className="dash-page-lead">Review, reply, approve, or decline. Nothing pays until you say so.</p>
+      </header>
+
       {hasAny && budget && (
-        <div className="border-b-2 border-black bg-white">
-          <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
+        <div className="border-y-2 border-black bg-white px-4 sm:px-0 sm:border-2 sm:p-4">
+          <div className="py-3 sm:py-0">
             <BudgetMeter budget={budget} currency={org?.bountyCurrency ?? "USD"} />
           </div>
         </div>
       )}
 
-      {/* Filter tabs */}
-      <div className="border-b-2 border-black bg-gray-100">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex flex-wrap items-center gap-2">
+      <div className="border-y-2 sm:border-2 border-black bg-gray-100 px-3 py-2.5 sm:p-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        <div className="flex flex-wrap gap-1.5">
           {FILTERS.map((f) => (
             <FilterTab
               key={f}
@@ -78,73 +82,80 @@ export default async function DashboardInbox({
               query={query}
             />
           ))}
-          <form className="ml-auto flex items-center gap-2" action="/dashboard" method="GET">
-            {activeFilter !== "all" && <input type="hidden" name="status" value={activeFilter} />}
-            <input
-              type="search"
-              name="q"
-              defaultValue={query}
-              placeholder="Search title, email, URL…"
-              className="brutal-input py-1 text-sm w-48 md:w-64"
-            />
-            <button type="submit" className="brutal-btn text-xs py-1">Search</button>
-          </form>
         </div>
+        <form className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto" action="/dashboard" method="GET">
+          {activeFilter !== "all" && <input type="hidden" name="status" value={activeFilter} />}
+          <input
+            type="search"
+            name="q"
+            defaultValue={query}
+            placeholder="Search…"
+            className="brutal-input py-2 text-sm flex-1 sm:w-52"
+            enterKeyHint="search"
+          />
+          <button type="submit" className="brutal-btn text-xs shrink-0">Go</button>
+        </form>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+      <div className="px-4 sm:px-0">
         {!hasAny ? (
-          <div className="brutal-box p-12 text-center">
-            <p className="font-mono text-lg mb-2">No submissions yet</p>
-            <p className="text-gray-500 mb-6 max-w-md mx-auto">
-              Paste one script tag, connect Stripe (no API keys), and reports show up here.
+          <div className="dash-card text-center py-10 px-4">
+            <p className="font-bold text-lg mb-2">No reports yet</p>
+            <p className="text-gray-600 mb-5 text-sm max-w-md mx-auto">
+              Install the widget, connect Stripe, send a test — then everything lands here.
             </p>
-            <div className="flex flex-wrap gap-3 justify-center">
-              <Link href="/dashboard/getting-started" className="brutal-btn-black inline-block">Start setup →</Link>
-              <Link href="/dashboard/account" className="brutal-btn inline-block">Connect Stripe</Link>
+            <div className="flex flex-col sm:flex-row flex-wrap gap-2 justify-center">
+              <Link href="/dashboard/getting-started" className="brutal-btn-black">
+                Open setup →
+              </Link>
+              <Link href="/dashboard/settings" className="brutal-btn">
+                Widget preview
+              </Link>
             </div>
           </div>
         ) : list.length === 0 ? (
-          <div className="brutal-box p-12 text-center">
-            <p className="font-mono text-lg mb-2">Nothing here</p>
-            <p className="text-gray-500 mb-6">
+          <div className="dash-card text-center py-8">
+            <p className="font-bold mb-2">Nothing here</p>
+            <p className="text-gray-600 text-sm mb-4">
               {query
-                ? <>No {activeFilter === "all" ? "" : activeFilter + " "}submissions match &ldquo;{query}&rdquo;.</>
-                : <>No {activeFilter} submissions right now.</>}
+                ? <>No matches for &ldquo;{query}&rdquo;.</>
+                : <>No {activeFilter} reports right now.</>}
             </p>
-            <Link href="/dashboard" className="brutal-btn inline-block">Clear filters</Link>
+            <Link href="/dashboard" className="brutal-btn text-sm">Clear filters</Link>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {list.map((s) => (
               <Link
                 key={s.id}
                 href={`/submissions/${s.id}`}
-                className="brutal-box block p-4 md:p-6 hover:bg-gray-50 transition-colors"
+                className="dash-card block hover:bg-yellow-50/50 active:bg-yellow-100 transition-colors !p-3.5 sm:!p-4"
               >
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <StatusBadge status={s.status} />
-                      <span className="font-mono text-xs text-gray-500">{s.issueType.replace("_", " ")}</span>
-                      <span className="font-mono text-xs text-gray-400">${s.bountyAmount}</span>
-                    </div>
-                    <h3 className="font-bold text-lg mb-1 truncate">{s.title}</h3>
-                    <p className="text-gray-600 text-sm mb-2 line-clamp-2">{s.description}</p>
-                    <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-gray-500">
-                      <span>{s.email}</span>
-                      <span className="truncate max-w-xs">{s.pageUrl}</span>
-                      <span>{new Date(s.createdAt).toLocaleString()}</span>
-                    </div>
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <StatusBadge status={s.status} />
+                    <span className="font-mono text-[10px] text-gray-500 uppercase">
+                      {s.issueType.replace("_", " ")}
+                    </span>
+                    <span className="font-mono text-[10px] text-gray-400">${s.bountyAmount}</span>
+                    {s.screenshotUrl && (
+                      <span className="font-mono text-[10px] border border-black px-1 uppercase">Shot</span>
+                    )}
                   </div>
-                  {s.screenshotUrl && <span className="brutal-badge shrink-0">Screenshot</span>}
+                  <h3 className="font-bold text-base leading-snug m-0">{s.title}</h3>
+                  <p className="text-gray-600 text-sm m-0 line-clamp-2">{s.description}</p>
+                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] font-mono text-gray-500">
+                    <span className="truncate max-w-[12rem]">{s.email}</span>
+                    <span className="truncate max-w-[10rem]">{s.pageUrl}</span>
+                    <span>{new Date(s.createdAt).toLocaleString()}</span>
+                  </div>
                 </div>
               </Link>
             ))}
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }
 

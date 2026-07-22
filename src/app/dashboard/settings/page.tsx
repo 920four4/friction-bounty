@@ -74,15 +74,15 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   const stripeReady = orgCanIssueRewards(org);
 
   return (
-    <main className="max-w-6xl mx-auto px-4 md:px-8 py-8 space-y-6">
-      <div>
-        <p className="font-mono text-xs uppercase text-gray-500 mb-1">Settings</p>
-        <h1 className="text-3xl font-bold font-mono uppercase">Widget &amp; org</h1>
-        <p className="text-sm text-gray-600 mt-1">
-          Design what customers see on your site, then install once. Billing &amp; Stripe →{" "}
+    <div className="space-y-5">
+      <header>
+        <p className="dash-page-kicker">Widget</p>
+        <h1 className="dash-page-title">How it looks on your site</h1>
+        <p className="dash-page-lead">
+          Live preview below. Save once — every page with your snippet updates. Stripe rewards live under{" "}
           <Link href="/dashboard/account" className="underline">Account</Link>.
         </p>
-      </div>
+      </header>
 
       {saved && (
         <div className="brutal-box-sm bg-green-100 px-4 py-2 font-mono text-sm">
@@ -203,9 +203,9 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
           </div>
         </section>
 
-        <button type="submit" className="brutal-btn-black">Save all settings</button>
+        <button type="submit" className="brutal-btn-black w-full sm:w-auto">Save all settings</button>
       </form>
-    </main>
+    </div>
   );
 }
 

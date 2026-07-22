@@ -22,157 +22,198 @@ export default async function GettingStartedPage() {
     limit: 1,
   });
 
-  const installed = subs.length > 0; // first report is the real install proof
+  const installed = subs.length > 0;
   const stripeReady = orgCanIssueRewards(org);
   const connectPending = !!org.stripeAccountId && !org.stripeChargesEnabled;
   const widgetUrl = `${widgetBaseUrl()}/widget.js`;
   const widgetSnippet = `<script src="${widgetUrl}" data-key="${org.apiKey}" async></script>`;
 
-  const checklist = [
-    { id: 1, label: "Copy & paste the widget", done: true, note: "Always available below" },
-    { id: 2, label: "Connect Stripe for rewards", done: stripeReady, note: stripeReady ? "Ready to pay bounties" : "One-click, no API keys" },
-    { id: 3, label: "Get your first report", done: installed, note: installed ? "Inbox has activity" : "Submit a test bug from your site" },
+  // 1 = snippet copied/install proven by first report, 2 = Stripe, 3 = test report (same signal as install)
+  const stepDone = {
+    install: installed,
+    stripe: stripeReady,
+    test: installed,
+  };
+  const progressDone =
+    (stepDone.install ? 1 : 0) + (stepDone.stripe ? 1 : 0) + (stepDone.test ? 1 : 0);
+
+  const chips = [
+    { id: 1, label: "Install", href: "#install", done: stepDone.install },
+    { id: 2, label: "Stripe", href: "#connect", done: stepDone.stripe },
+    { id: 3, label: "Test", href: "#test", done: stepDone.test },
   ];
-  const doneCount = checklist.filter((c) => c.done).length;
 
   return (
-    <main className="max-w-3xl mx-auto px-4 md:px-8 py-8 space-y-6">
+    <div className="space-y-5 max-w-2xl">
       <header>
-        <p className="font-mono text-xs uppercase text-gray-500 mb-1">Setup</p>
-        <h1 className="text-3xl md:text-4xl font-bold font-mono uppercase leading-tight">
-          Welcome, {org.name}.
-        </h1>
-        <p className="text-gray-700 mt-2">
-          Three steps to a live bug bounty. Takes about two minutes.
+        <p className="dash-page-kicker">Setup</p>
+        <h1 className="dash-page-title">Get live in 3 steps</h1>
+        <p className="dash-page-lead">
+          Welcome, <strong>{org.name}</strong>. Copy one line of code, connect Stripe (no API keys),
+          then send yourself a test report.
         </p>
       </header>
 
       {/* Progress */}
-      <section className="brutal-box p-5">
-        <div className="flex items-center justify-between gap-3 mb-3">
-          <p className="font-mono text-xs uppercase text-gray-500">Progress</p>
-          <p className="font-mono text-sm font-bold">{doneCount} / {checklist.length}</p>
+      <section className="dash-card">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <p className="font-mono text-xs uppercase text-gray-500">Your progress</p>
+          <p className="font-mono text-sm font-bold">{progressDone} / 3</p>
         </div>
-        <div className="w-full h-3 border-2 border-black bg-white mb-4">
+        <div className="w-full h-2.5 border-2 border-black bg-white mb-4">
           <div
             className="h-full bg-green-500 transition-all"
-            style={{ width: `${(doneCount / checklist.length) * 100}%` }}
+            style={{ width: `${(progressDone / 3) * 100}%` }}
           />
         </div>
-        <ol className="space-y-2">
-          {checklist.map((c) => (
-            <li key={c.id} className="flex items-start gap-3">
-              <span
-                className={
-                  "shrink-0 w-7 h-7 border-2 border-black flex items-center justify-center font-mono text-sm " +
-                  (c.done ? "bg-green-500 text-white" : "bg-white")
-                }
-              >
-                {c.done ? "✓" : c.id}
-              </span>
-              <div>
-                <p className={"font-mono text-sm font-bold " + (c.done ? "line-through text-gray-500" : "")}>
-                  {c.label}
-                </p>
-                <p className="text-xs text-gray-500 font-mono">{c.note}</p>
-              </div>
-            </li>
+        <div className="flex flex-wrap gap-2">
+          {chips.map((s) => (
+            <a
+              key={s.id}
+              href={s.href}
+              className={
+                "inline-flex items-center gap-1.5 px-2.5 py-1.5 border-2 border-black font-mono text-xs " +
+                (s.done ? "bg-green-100" : "bg-white")
+              }
+            >
+              <span>{s.done ? "✓" : s.id}</span>
+              {s.label}
+            </a>
           ))}
-        </ol>
+        </div>
       </section>
 
-      {/* Step 1 — Install */}
-      <section className="brutal-box p-6 space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="brutal-box-sm bg-black text-white w-8 h-8 flex items-center justify-center font-mono font-bold text-sm">1</span>
-          <h2 className="font-mono font-bold uppercase text-lg">Paste this on your site</h2>
-        </div>
-        <p className="text-sm text-gray-700">
-          One line, just before <code className="bg-gray-100 px-1">&lt;/body&gt;</code>.
-          Works on any stack — React, Next, Vue, Shopify themes, plain HTML.
-        </p>
-        <CopyField value={widgetSnippet} />
-        <details className="text-sm">
-          <summary className="font-mono text-xs uppercase cursor-pointer">Next.js snippet</summary>
-          <div className="mt-2">
-            <CopyField
-              value={`import Script from "next/script";\n\n<Script src="${widgetUrl}" data-key="${org.apiKey}" strategy="afterInteractive" />`}
-            />
+      {/* Step 1 */}
+      <section id="install" className="dash-card space-y-3 scroll-mt-20">
+        <div className="flex items-start gap-3">
+          <span className={"dash-step-num " + (installed ? "done" : "")}>1</span>
+          <div className="min-w-0 flex-1">
+            <h2 className="font-bold text-lg m-0">Install the widget</h2>
+            <p className="text-sm text-gray-600 mt-1 m-0">
+              Paste this once on your site, just before <code className="bg-gray-100 px-1 text-xs">&lt;/body&gt;</code>.
+              Works on any stack.
+            </p>
           </div>
-        </details>
-        <p className="text-xs font-mono text-gray-500">
-          API key is already in the snippet. Open{" "}
-          <Link href="/dashboard/settings" className="underline font-bold">Settings → Widget studio</Link>
-          {" "}for a live preview of the button + form (color, style, corner, chat-widget offset).
+        </div>
+        <CopyField value={widgetSnippet} />
+        <div className="flex flex-wrap gap-2">
+          <Link href="/dashboard/settings" className="brutal-btn text-sm">
+            Preview &amp; brand the look →
+          </Link>
+        </div>
+        <p className="text-xs text-gray-500 m-0">
+          Color, style, corner, and button label are in <strong>Widget</strong> settings — no need to change this snippet again.
         </p>
       </section>
 
-      {/* Step 2 — Stripe Connect */}
-      <section className="brutal-box p-6 space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="brutal-box-sm bg-black text-white w-8 h-8 flex items-center justify-center font-mono font-bold text-sm">2</span>
-          <h2 className="font-mono font-bold uppercase text-lg">Connect Stripe for rewards</h2>
+      {/* Step 2 — Stripe Connect explained simply */}
+      <section id="connect" className="dash-card space-y-4 scroll-mt-20">
+        <div className="flex items-start gap-3">
+          <span className={"dash-step-num " + (stripeReady ? "done" : "")}>2</span>
+          <div className="min-w-0 flex-1">
+            <h2 className="font-bold text-lg m-0">Connect Stripe for rewards</h2>
+            <p className="text-sm text-gray-600 mt-1 m-0">
+              So you can pay reporters with <strong>your</strong> money — not ours.
+            </p>
+          </div>
         </div>
-        <p className="text-sm text-gray-700">
-          Click once. Stripe opens a secure form for your business details.
-          <strong> We never ask for API keys</strong> — and never hold reward money.
-        </p>
+
         {stripeReady ? (
-          <p className="brutal-box-sm bg-green-100 px-3 py-2 font-mono text-sm">
-            ✓ Stripe connected. You can approve &amp; reward reports.
-          </p>
+          <div className="border-2 border-black bg-green-100 px-3 py-2.5 font-mono text-sm">
+            ✓ Stripe connected. You can approve reports and issue rewards.
+          </div>
         ) : (
-          <ConnectStripeButton connected={false} pending={connectPending} />
+          <>
+            <div className="border-2 border-black bg-yellow-50 p-3 sm:p-4 space-y-3 text-sm">
+              <p className="font-bold m-0">What is this?</p>
+              <p className="m-0 text-gray-700 leading-relaxed">
+                You click <strong>Connect with Stripe</strong>. Stripe opens a short form (business details).
+                When you’re done, we can create credits or promo codes <em>on your Stripe account</em> when you
+                approve a bug.
+              </p>
+              <p className="m-0 text-gray-700 leading-relaxed">
+                <strong>We never ask for API keys.</strong> We never hold the bounty money. We don’t take a cut of rewards.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <p className="font-mono text-xs uppercase text-gray-500 m-0">What you’ll do (about 2 minutes)</p>
+              <ol className="m-0 pl-5 space-y-1.5 text-sm text-gray-800">
+                <li>Click the button below</li>
+                <li>Log into Stripe or create an account</li>
+                <li>Answer Stripe’s questions (business type, etc.)</li>
+                <li>Come back here — status becomes “Connected”</li>
+              </ol>
+            </div>
+
+            <ConnectStripeButton connected={false} pending={connectPending} />
+
+            <details className="text-sm border-2 border-black p-3 bg-gray-50">
+              <summary className="font-mono text-xs uppercase cursor-pointer font-bold">
+                Two kinds of money (read this once)
+              </summary>
+              <ul className="mt-3 space-y-2 text-gray-700 pl-0 list-none">
+                <li>
+                  <strong>Paying us (optional Pro)</strong> — your Friction Bounty subscription. Managed under Account → Billing.
+                </li>
+                <li>
+                  <strong>Paying reporters</strong> — credits/promo codes on <em>your</em> Stripe when you approve a report.
+                  That’s what Connect is for.
+                </li>
+              </ul>
+            </details>
+          </>
         )}
-        <p className="text-xs text-gray-500 font-mono">
-          Prefer full account settings?{" "}
-          <Link href="/dashboard/account" className="underline">Open Account →</Link>
-        </p>
+
+        <Link href="/dashboard/account" className="text-sm underline font-mono">
+          Full Account page (billing + Connect) →
+        </Link>
       </section>
 
-      {/* Step 3 — Test */}
-      <section className="brutal-box p-6 space-y-3">
-        <div className="flex items-center gap-2">
-          <span className="brutal-box-sm bg-black text-white w-8 h-8 flex items-center justify-center font-mono font-bold text-sm">3</span>
-          <h2 className="font-mono font-bold uppercase text-lg">Send a test report</h2>
+      {/* Step 3 */}
+      <section id="test" className="dash-card space-y-3 scroll-mt-20">
+        <div className="flex items-start gap-3">
+          <span className={"dash-step-num " + (installed ? "done" : "")}>3</span>
+          <div className="min-w-0 flex-1">
+            <h2 className="font-bold text-lg m-0">Send a test report</h2>
+            <p className="text-sm text-gray-600 mt-1 m-0">
+              Prove the install works end-to-end.
+            </p>
+          </div>
         </div>
-        <ol className="list-decimal pl-5 text-sm space-y-1 text-gray-700">
-          <li>Open your site with the widget installed</li>
-          <li>Click the badge → describe a fake bug → submit</li>
-          <li>It lands in your inbox in about a second</li>
+        <ol className="m-0 pl-5 space-y-1.5 text-sm text-gray-800">
+          <li>Open your site with the snippet installed</li>
+          <li>Tap the corner button → fill a fake bug → submit</li>
+          <li>It appears in your <Link href="/dashboard" className="underline">Inbox</Link> within a second</li>
         </ol>
         {installed ? (
-          <p className="brutal-box-sm bg-green-100 px-3 py-2 font-mono text-sm">
-            ✓ First report received. You&rsquo;re live.
-          </p>
+          <div className="border-2 border-black bg-green-100 px-3 py-2.5 font-mono text-sm">
+            ✓ First report received. You’re live.
+          </div>
         ) : (
-          <p className="brutal-box-sm bg-yellow-100 px-3 py-2 font-mono text-sm">
+          <div className="border-2 border-black bg-yellow-50 px-3 py-2.5 font-mono text-sm">
             Waiting for your first report…
-          </p>
+          </div>
         )}
       </section>
 
-      {/* How rewards work — short */}
-      <section className="brutal-box p-6 bg-gray-50 space-y-2">
-        <h2 className="font-mono font-bold uppercase text-sm">How rewards work (30 sec)</h2>
-        <ul className="text-sm space-y-1 text-gray-700">
-          <li>→ You review every report — nothing pays out automatically</li>
-          <li>→ Approve → credit on their Stripe customer, or a one-time promo code</li>
-          <li>→ Optional monthly budget blocks overspending</li>
+      <section className="dash-card bg-gray-50 space-y-2">
+        <h2 className="font-mono text-xs uppercase font-bold m-0">After you’re live</h2>
+        <ul className="m-0 pl-5 text-sm space-y-1 text-gray-700">
+          <li>Review every report yourself — nothing pays automatically</li>
+          <li>Approve → credit or promo code on your Stripe</li>
+          <li>Optional monthly budget stops overspend</li>
         </ul>
       </section>
 
-      <div className="flex flex-wrap gap-3 pt-2">
+      <div className="flex flex-wrap gap-2 pt-1">
         <Link href="/dashboard" className="brutal-btn-black">
           Go to inbox →
         </Link>
         <Link href="/dashboard/settings" className="brutal-btn">
-          Widget settings
-        </Link>
-        <Link href="/dashboard/account" className="brutal-btn">
-          Account &amp; billing
+          Widget look
         </Link>
       </div>
-    </main>
+    </div>
   );
 }
