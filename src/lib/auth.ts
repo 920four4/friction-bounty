@@ -8,6 +8,18 @@ import { eq } from "drizzle-orm";
 const SESSION_COOKIE = "fb_session";
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
+/**
+ * Hard allowlist — platform admin is ONLY this email, forever.
+ * Env SUPER_ADMIN_EMAIL is ignored if it is anything else.
+ */
+export const ALLOWED_SUPER_ADMIN_EMAILS = ["z@920four.com"] as const;
+
+export function isAllowedSuperAdminEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  const normalized = email.trim().toLowerCase();
+  return (ALLOWED_SUPER_ADMIN_EMAILS as readonly string[]).includes(normalized);
+}
+
 function getSessionSecret(): string {
   const secret = process.env.SESSION_SECRET;
   if (!secret || secret.length < 32) {
@@ -16,8 +28,12 @@ function getSessionSecret(): string {
   return secret;
 }
 
+/** Always the hard-coded owner email when allowlisted; never a random env value. */
 function getSuperAdminEmail(): string | null {
-  return process.env.SUPER_ADMIN_EMAIL?.toLowerCase() || null;
+  const envEmail = process.env.SUPER_ADMIN_EMAIL?.trim().toLowerCase() || null;
+  // Prefer env only if it is on the allowlist; otherwise fall back to the sole owner.
+  if (envEmail && isAllowedSuperAdminEmail(envEmail)) return envEmail;
+  return ALLOWED_SUPER_ADMIN_EMAILS[0];
 }
 
 function getSuperAdminPassword(): string | null {
@@ -113,27 +129,36 @@ export async function clearSession() {
 // ---------- login flows ----------
 
 /**
- * Attempt login. Super admin is bootstrapped from env (SUPER_ADMIN_EMAIL +
- * SUPER_ADMIN_PASSWORD); org owners come from the users table.
+ * Attempt login.
+ * Super admin: ONLY allowlisted emails (z@920four.com) + SUPER_ADMIN_PASSWORD.
+ * Org owners come from the users table (never elevated to super_admin unless allowlisted).
  */
 export async function attemptLogin(email: string, password: string): Promise<SessionPayload | null> {
   const normalized = email.trim().toLowerCase();
 
-  const superEmail = getSuperAdminEmail();
   const superPass = getSuperAdminPassword();
-  if (superEmail && superPass && normalized === superEmail && constantTimeEqual(password, superPass)) {
+  if (
+    isAllowedSuperAdminEmail(normalized) &&
+    superPass &&
+    constantTimeEqual(password, superPass)
+  ) {
     return { uid: "super", role: "super_admin", exp: 0 };
   }
 
+  // Even with the right password, non-allowlisted emails never get super_admin.
   const db = getDb();
   const user = await db.query.users.findFirst({
     where: eq(users.email, normalized),
   });
   if (!user) return null;
   if (!verifyPassword(password, user.passwordHash)) return null;
-  if (user.role === "super_admin") {
+
+  // DB role "super_admin" is only honored for the hard allowlist email.
+  if (user.role === "super_admin" && isAllowedSuperAdminEmail(user.email)) {
     return { uid: user.id, role: "super_admin", exp: 0 };
   }
+
+  // Never treat arbitrary org users as platform admin.
   return { uid: user.id, role: "org_owner", oid: user.orgId ?? undefined, exp: 0 };
 }
 
@@ -145,16 +170,28 @@ export async function requireSession(): Promise<SessionPayload> {
   return s;
 }
 
+/**
+ * Platform admin only — role must be super_admin AND email must be on the
+ * hard allowlist (z@920four.com). Anyone else is bounced to /dashboard.
+ */
 export async function requireSuperAdmin(): Promise<SessionPayload> {
   const s = await requireSession();
   if (s.role !== "super_admin") redirect("/dashboard");
+
+  const user = await getCurrentUser();
+  if (!user || !isAllowedSuperAdminEmail(user.email)) {
+    // Stale or forged session — kill path to app surface, not admin.
+    redirect("/dashboard");
+  }
   return s;
 }
 
 export async function requireOrgOwner(): Promise<{ session: SessionPayload; orgId: string }> {
   const s = await requireSession();
   if (s.role !== "org_owner" || !s.oid) {
-    if (s.role === "super_admin") redirect("/super-admin");
+    if (s.role === "super_admin" && isAllowedSuperAdminEmail((await getCurrentUser())?.email)) {
+      redirect("/admin");
+    }
     redirect("/login");
   }
   return { session: s, orgId: s.oid! };
@@ -164,11 +201,19 @@ export async function getCurrentUser() {
   const s = await getSession();
   if (!s) return null;
   if (s.role === "super_admin" && s.uid === "super") {
-    return { id: "super", email: getSuperAdminEmail() ?? "", role: "super_admin" as const, name: "Super Admin", orgId: null };
+    const email = getSuperAdminEmail() ?? ALLOWED_SUPER_ADMIN_EMAILS[0];
+    // Never surface super_admin identity for non-allowlisted emails.
+    if (!isAllowedSuperAdminEmail(email)) return null;
+    return { id: "super", email, role: "super_admin" as const, name: "Super Admin", orgId: null };
   }
   const db = getDb();
   const u = await db.query.users.findFirst({ where: eq(users.id, s.uid) });
   if (!u) return null;
+
+  // Strip elevated role if somehow stored for a non-allowlisted account.
+  if (u.role === "super_admin" && !isAllowedSuperAdminEmail(u.email)) {
+    return { id: u.id, email: u.email, role: "org_owner" as const, name: u.name, orgId: u.orgId };
+  }
   return { id: u.id, email: u.email, role: u.role, name: u.name, orgId: u.orgId };
 }
 

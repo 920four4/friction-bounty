@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { getCurrentUser, getSession, isAllowedSuperAdminEmail } from "@/lib/auth";
 import { getDb } from "@/db";
 import { blogPosts } from "@/db/schema";
 import { SEED_POSTS } from "@/lib/blog-seed";
@@ -7,10 +7,16 @@ import { eq } from "drizzle-orm";
 
 export const runtime = "nodejs";
 
-/** Super-admin only: upsert educational seed posts. POST /admin/seed-blog */
+/** Super-admin only (z@920four.com): upsert educational seed posts. */
 export async function POST() {
   const session = await getSession();
-  if (!session || session.role !== "super_admin") {
+  const user = await getCurrentUser();
+  if (
+    !session ||
+    session.role !== "super_admin" ||
+    !user ||
+    !isAllowedSuperAdminEmail(user.email)
+  ) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

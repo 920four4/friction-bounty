@@ -25,7 +25,7 @@ export default async function SubmissionDetailPage({
   const submission = await db.query.submissions.findFirst({
     where: eq(submissions.id, id),
   });
-  if (!submission) redirect(session.role === "super_admin" ? "/super-admin" : "/dashboard");
+  if (!submission) redirect(session.role === "super_admin" ? "/admin" : "/dashboard");
   if (session.role === "org_owner" && submission.orgId !== session.oid) redirect("/dashboard");
 
   const isSuperAdmin = session.role === "super_admin";

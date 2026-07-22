@@ -42,6 +42,6 @@ export async function POST(request: NextRequest) {
 
   await setSession({ uid: session.uid, role: session.role, oid: session.oid });
 
-  const redirectTo = session.role === "super_admin" ? "/super-admin" : "/dashboard";
+  const redirectTo = session.role === "super_admin" ? "/admin" : "/dashboard";
   return NextResponse.json({ ok: true, redirect: redirectTo });
 }

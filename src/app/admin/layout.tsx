@@ -1,7 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getCurrentUser, requireSuperAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
+
+/** Never index the admin console. */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false, nocache: true, googleBot: { index: false, follow: false, noimageindex: true } },
+  title: "Admin",
+};
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   await requireSuperAdmin();

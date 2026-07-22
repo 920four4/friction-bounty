@@ -23,14 +23,26 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   async headers() {
+    const noIndex = [{ key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" }];
     const headers: { source: string; headers: { key: string; value: string }[] }[] = [
       { source: "/((?!api).*)", headers: securityHeaders },
+      // Never index admin, auth, dashboard, migrate — even if a bot ignores robots.txt
+      { source: "/admin", headers: noIndex },
+      { source: "/admin/:path*", headers: noIndex },
+      { source: "/super-admin", headers: noIndex },
+      { source: "/super-admin/:path*", headers: noIndex },
+      { source: "/dashboard", headers: noIndex },
+      { source: "/dashboard/:path*", headers: noIndex },
+      { source: "/submissions/:path*", headers: noIndex },
+      { source: "/migrate", headers: noIndex },
+      { source: "/login", headers: noIndex },
+      { source: "/signup", headers: noIndex },
     ];
     if (!isProd) {
       // Block search engines on preview deployments.
       headers.push({
         source: "/:path*",
-        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        headers: noIndex,
       });
     }
     return headers;
