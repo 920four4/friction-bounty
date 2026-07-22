@@ -4,13 +4,19 @@ import type Stripe from "stripe";
 import { getDb } from "@/db";
 import { organizations } from "@/db/schema";
 import { getPlatformStripe } from "@/lib/stripe";
+import {
+  APP_TAG,
+  checkoutBelongsToApp,
+  recordPaymentEvent,
+  resolveOrgIdFromCustomer,
+  subscriptionBelongsToApp,
+} from "@/lib/payments";
 
 export const runtime = "nodejs";
 
 /**
- * Platform billing webhooks. Updates plan / subscription status on the org.
- * Configure endpoint: https://frictionbounty.app/api/stripe/webhook
- * Events: checkout.session.completed, customer.subscription.*
+ * Platform billing webhooks — **Friction Bounty only**.
+ * Events from other 920four apps on the same Stripe account are ignored.
  */
 export async function POST(request: NextRequest) {
   const stripe = getPlatformStripe();
@@ -37,34 +43,68 @@ export async function POST(request: NextRequest) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        const orgId = session.metadata?.friction_bounty_org_id || session.client_reference_id;
-        if (!orgId || session.mode !== "subscription") break;
-        const subId = typeof session.subscription === "string"
-          ? session.subscription
-          : session.subscription?.id;
-        const custId = typeof session.customer === "string"
-          ? session.customer
-          : session.customer?.id;
-        await db
-          .update(organizations)
-          .set({
-            plan: "pro",
-            billingStatus: "active",
-            billingSubscriptionId: subId ?? undefined,
-            billingCustomerId: custId ?? undefined,
-            updatedAt: new Date(),
-          })
-          .where(eq(organizations.id, orgId));
+        const { belongs, orgId, priceId } = await checkoutBelongsToApp(session);
+        if (!belongs) {
+          console.info("[stripe webhook] ignore checkout (not friction_bounty)", session.id);
+          break;
+        }
+
+        const subId =
+          typeof session.subscription === "string"
+            ? session.subscription
+            : session.subscription?.id;
+        const custId =
+          typeof session.customer === "string" ? session.customer : session.customer?.id;
+        const resolvedOrg = orgId || (await resolveOrgIdFromCustomer(custId));
+
+        if (resolvedOrg) {
+          await db
+            .update(organizations)
+            .set({
+              plan: "pro",
+              billingStatus: "active",
+              billingSubscriptionId: subId ?? undefined,
+              billingCustomerId: custId ?? undefined,
+              updatedAt: new Date(),
+            })
+            .where(eq(organizations.id, resolvedOrg));
+        }
+
+        await recordPaymentEvent({
+          orgId: resolvedOrg,
+          stripeEventId: event.id,
+          stripeObjectId: session.id,
+          type: event.type,
+          priceId,
+          amountCents: session.amount_total,
+          currency: session.currency,
+          status: session.payment_status || "completed",
+          customerId: custId,
+          subscriptionId: subId,
+          description: "Pro subscription checkout",
+          metadata: {
+            app: APP_TAG,
+            ...(session.metadata || {}),
+          },
+        });
         break;
       }
+
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
-        const orgId = sub.metadata?.friction_bounty_org_id;
+        const { belongs, orgId, priceId } = await subscriptionBelongsToApp(sub);
+        if (!belongs) {
+          console.info("[stripe webhook] ignore subscription (not friction_bounty)", sub.id);
+          break;
+        }
+
         const status = sub.status;
         const active = status === "active" || status === "trialing";
+        const custId = typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
+        const resolvedOrg = orgId || (await resolveOrgIdFromCustomer(custId));
 
-        if (orgId) {
+        if (resolvedOrg) {
           await db
             .update(organizations)
             .set({
@@ -73,22 +113,68 @@ export async function POST(request: NextRequest) {
               billingSubscriptionId: sub.id,
               updatedAt: new Date(),
             })
-            .where(eq(organizations.id, orgId));
-        } else if (typeof sub.customer === "string") {
-          // Fallback: match by billing customer id
-          await db
-            .update(organizations)
-            .set({
-              plan: active ? "pro" : "free",
-              billingStatus: mapSubStatus(status),
-              billingSubscriptionId: sub.id,
-              updatedAt: new Date(),
-            })
-            .where(eq(organizations.billingCustomerId, sub.customer));
+            .where(eq(organizations.id, resolvedOrg));
         }
+
+        await recordPaymentEvent({
+          orgId: resolvedOrg,
+          stripeEventId: event.id,
+          stripeObjectId: sub.id,
+          type: event.type,
+          priceId,
+          amountCents: null,
+          currency: sub.currency || "usd",
+          status,
+          customerId: custId,
+          subscriptionId: sub.id,
+          description: `Subscription ${status}`,
+          metadata: { app: APP_TAG, ...(sub.metadata || {}) },
+        });
         break;
       }
+
+      case "invoice.paid":
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as Stripe.Invoice;
+        // Only track if subscription is ours
+        const subRef = (invoice as { subscription?: string | { id: string } | null }).subscription;
+        const subId = typeof subRef === "string" ? subRef : subRef?.id;
+        if (!subId || !stripe) break;
+
+        let sub: Stripe.Subscription;
+        try {
+          sub = await stripe.subscriptions.retrieve(subId);
+        } catch {
+          break;
+        }
+        const { belongs, orgId, priceId } = await subscriptionBelongsToApp(sub);
+        if (!belongs) {
+          console.info("[stripe webhook] ignore invoice (not friction_bounty)", invoice.id);
+          break;
+        }
+
+        const custId = typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id;
+        const resolvedOrg = orgId || (await resolveOrgIdFromCustomer(custId));
+
+        await recordPaymentEvent({
+          orgId: resolvedOrg,
+          stripeEventId: event.id,
+          stripeObjectId: invoice.id,
+          type: event.type,
+          priceId,
+          amountCents: invoice.amount_paid ?? invoice.amount_due,
+          currency: invoice.currency,
+          status: invoice.status,
+          customerId: custId,
+          subscriptionId: subId,
+          description: event.type === "invoice.paid" ? "Invoice paid" : "Invoice payment failed",
+          metadata: { app: APP_TAG },
+        });
+        break;
+      }
+
       default:
+        // Explicitly ignore everything else (other apps' payment_intent, etc.)
         break;
     }
   } catch (err) {

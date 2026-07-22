@@ -192,9 +192,68 @@ ALTER TABLE organizations ADD COLUMN IF NOT EXISTS billing_status VARCHAR(30) NO
 COMMIT;
 `;
 
+// Blog posts + Friction-Bounty-only payment event ledger.
+export const migration_0005_blog_payments = /* sql */ `
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS payment_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  org_id UUID REFERENCES organizations(id) ON DELETE SET NULL,
+  stripe_event_id VARCHAR(255) NOT NULL,
+  stripe_object_id VARCHAR(255),
+  type VARCHAR(80) NOT NULL,
+  app VARCHAR(40) NOT NULL DEFAULT 'friction_bounty',
+  price_id VARCHAR(255),
+  amount_cents INTEGER,
+  currency VARCHAR(10),
+  status VARCHAR(40),
+  customer_id VARCHAR(255),
+  subscription_id VARCHAR(255),
+  description TEXT,
+  metadata_json TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS payment_events_stripe_event_idx ON payment_events(stripe_event_id);
+CREATE INDEX IF NOT EXISTS payment_events_org_idx ON payment_events(org_id);
+CREATE INDEX IF NOT EXISTS payment_events_created_idx ON payment_events(created_at);
+
+CREATE TABLE IF NOT EXISTS blog_posts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug VARCHAR(160) NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  excerpt TEXT NOT NULL DEFAULT '',
+  content TEXT NOT NULL DEFAULT '',
+  status VARCHAR(20) NOT NULL DEFAULT 'draft',
+  category VARCHAR(80) NOT NULL DEFAULT 'guides',
+  tags TEXT NOT NULL DEFAULT '[]',
+  primary_keyword VARCHAR(120) NOT NULL DEFAULT '',
+  secondary_keywords TEXT NOT NULL DEFAULT '[]',
+  meta_title VARCHAR(70) NOT NULL DEFAULT '',
+  meta_description VARCHAR(170) NOT NULL DEFAULT '',
+  og_image_url TEXT,
+  canonical_path VARCHAR(200),
+  author_name VARCHAR(120) NOT NULL DEFAULT 'Friction Bounty',
+  cta_label VARCHAR(80) NOT NULL DEFAULT 'Start free',
+  cta_href VARCHAR(200) NOT NULL DEFAULT '/signup',
+  related_slugs TEXT NOT NULL DEFAULT '[]',
+  word_count INTEGER NOT NULL DEFAULT 0,
+  seo_score INTEGER NOT NULL DEFAULT 0,
+  seo_report TEXT NOT NULL DEFAULT '{}',
+  published_at TIMESTAMP,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS blog_posts_slug_idx ON blog_posts(slug);
+CREATE INDEX IF NOT EXISTS blog_posts_status_idx ON blog_posts(status);
+CREATE INDEX IF NOT EXISTS blog_posts_published_idx ON blog_posts(published_at);
+
+COMMIT;
+`;
+
 export const migrations: Array<{ name: string; sql: string }> = [
   { name: "0001_multitenant", sql: migration_0001_multitenant },
   { name: "0002_monthly_budget", sql: migration_0002_monthly_budget },
   { name: "0003_submissions_columns", sql: migration_0003_submissions_columns },
   { name: "0004_connect_billing", sql: migration_0004_connect_billing },
+  { name: "0005_blog_payments", sql: migration_0005_blog_payments },
 ];

@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
         product_description: "Customer rewards for bug reports via Friction Bounty",
       },
       metadata: {
+        app: "friction_bounty",
         friction_bounty_org_id: org.id,
       },
     });

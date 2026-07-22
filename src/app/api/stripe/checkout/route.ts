@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const customer = await stripe.customers.create({
       email: user?.email || undefined,
       name: org.name,
-      metadata: { friction_bounty_org_id: org.id },
+      metadata: { app: "friction_bounty", friction_bounty_org_id: org.id },
     });
     customerId = customer.id;
     await db
@@ -58,9 +58,9 @@ export async function POST(request: NextRequest) {
     allow_promotion_codes: true,
     client_reference_id: orgId,
     subscription_data: {
-      metadata: { friction_bounty_org_id: orgId },
+      metadata: { app: "friction_bounty", friction_bounty_org_id: orgId },
     },
-    metadata: { friction_bounty_org_id: orgId },
+    metadata: { app: "friction_bounty", friction_bounty_org_id: orgId },
   });
 
   return NextResponse.json({ url: checkout.url });

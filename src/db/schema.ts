@@ -152,10 +152,66 @@ export const rateLimitLog = pgTable("rate_limit_log", {
   orgIpIdx: index("rate_limit_org_ip_idx").on(table.orgId, table.ipAddress, table.attemptedAt),
 }));
 
+/** SaaS billing events for Friction Bounty only (never other products on the same Stripe account). */
+export const paymentEvents = pgTable("payment_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orgId: uuid("org_id").references(() => organizations.id, { onDelete: "set null" }),
+  stripeEventId: varchar("stripe_event_id", { length: 255 }).notNull(),
+  stripeObjectId: varchar("stripe_object_id", { length: 255 }),
+  type: varchar("type", { length: 80 }).notNull(), // checkout.session.completed | invoice.paid | subscription.updated | ...
+  app: varchar("app", { length: 40 }).notNull().default("friction_bounty"),
+  priceId: varchar("price_id", { length: 255 }),
+  amountCents: integer("amount_cents"),
+  currency: varchar("currency", { length: 10 }),
+  status: varchar("status", { length: 40 }),
+  customerId: varchar("customer_id", { length: 255 }),
+  subscriptionId: varchar("subscription_id", { length: 255 }),
+  description: text("description"),
+  metadataJson: text("metadata_json"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  eventIdx: uniqueIndex("payment_events_stripe_event_idx").on(table.stripeEventId),
+  orgIdx: index("payment_events_org_idx").on(table.orgId),
+  createdIdx: index("payment_events_created_idx").on(table.createdAt),
+}));
+
+/** Marketing blog posts with built-in SEO scoring. */
+export const blogPosts = pgTable("blog_posts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  slug: varchar("slug", { length: 160 }).notNull(),
+  title: varchar("title", { length: 200 }).notNull(),
+  excerpt: text("excerpt").notNull().default(""),
+  content: text("content").notNull().default(""), // Markdown
+  status: varchar("status", { length: 20 }).notNull().default("draft"), // draft | published
+  category: varchar("category", { length: 80 }).notNull().default("guides"),
+  tags: text("tags").notNull().default("[]"), // JSON string[]
+  primaryKeyword: varchar("primary_keyword", { length: 120 }).notNull().default(""),
+  secondaryKeywords: text("secondary_keywords").notNull().default("[]"), // JSON string[]
+  metaTitle: varchar("meta_title", { length: 70 }).notNull().default(""),
+  metaDescription: varchar("meta_description", { length: 170 }).notNull().default(""),
+  ogImageUrl: text("og_image_url"),
+  canonicalPath: varchar("canonical_path", { length: 200 }),
+  authorName: varchar("author_name", { length: 120 }).notNull().default("Friction Bounty"),
+  ctaLabel: varchar("cta_label", { length: 80 }).notNull().default("Start free"),
+  ctaHref: varchar("cta_href", { length: 200 }).notNull().default("/signup"),
+  relatedSlugs: text("related_slugs").notNull().default("[]"), // JSON string[]
+  wordCount: integer("word_count").notNull().default(0),
+  seoScore: integer("seo_score").notNull().default(0), // 0–100
+  seoReport: text("seo_report").notNull().default("{}"), // JSON SeoReport
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  slugIdx: uniqueIndex("blog_posts_slug_idx").on(table.slug),
+  statusIdx: index("blog_posts_status_idx").on(table.status),
+  publishedIdx: index("blog_posts_published_idx").on(table.publishedAt),
+}));
+
 // Relations
 export const organizationsRelations = relations(organizations, ({ many }) => ({
   users: many(users),
   submissions: many(submissions),
+  paymentEvents: many(paymentEvents),
 }));
 
 export const usersRelations = relations(users, ({ one }) => ({
@@ -185,5 +241,12 @@ export const submissionMessagesRelations = relations(submissionMessages, ({ one 
   sender: one(users, {
     fields: [submissionMessages.senderUserId],
     references: [users.id],
+  }),
+}));
+
+export const paymentEventsRelations = relations(paymentEvents, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [paymentEvents.orgId],
+    references: [organizations.id],
   }),
 }));

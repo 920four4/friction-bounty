@@ -1617,3 +1617,80 @@ body {
     animation: none !important;
   }
 }
+
+/* —— Blog prose —— */
+.blog-prose {
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: #1a1a1a;
+}
+.blog-prose h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 2rem 0 0.75rem;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.blog-prose h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.5rem;
+}
+.blog-prose h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 1.25rem 0 0.4rem;
+}
+.blog-prose p {
+  margin: 0 0 1rem;
+}
+.blog-prose ul,
+.blog-prose ol {
+  margin: 0 0 1rem 1.25rem;
+  padding: 0;
+}
+.blog-prose li {
+  margin: 0.35rem 0;
+}
+.blog-prose a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-weight: 500;
+}
+.blog-prose code {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.88em;
+  background: #f0efe9;
+  border: 1px solid #ddd;
+  padding: 0.1em 0.35em;
+}
+.blog-prose .blog-pre {
+  border: 2px solid #0a0a0a;
+  background: #0a0a0a;
+  color: #7dffa2;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 0 0 1.25rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.blog-prose .blog-pre code {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  padding: 0;
+}
+.blog-prose .blog-img {
+  max-width: 100%;
+  height: auto;
+  border: 2px solid #0a0a0a;
+  margin: 1rem 0;
+}
+.blog-prose hr {
+  border: 0;
+  border-top: 2px solid #0a0a0a;
+  margin: 2rem 0;
+}
+.blog-prose strong {
+  font-weight: 700;
+}

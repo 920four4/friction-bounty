@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { getDb } from "@/db";
-import { organizations, users } from "@/db/schema";
+import { organizations, paymentEvents, users } from "@/db/schema";
 import { requireOrgOwner, getCurrentUser } from "@/lib/auth";
 import { isStripePlatformConfigured, orgCanIssueRewards } from "@/lib/stripe";
 import {
@@ -30,10 +30,16 @@ export default async function AccountPage({
   const isPro = org.plan === "pro" && (org.billingStatus === "active" || org.billingStatus === "trialing");
   const platformOk = isStripePlatformConfigured();
 
-  // Owner email from user row
-  const owner = user?.id && user.id !== "super"
-    ? await db.query.users.findFirst({ where: eq(users.id, user.id) })
-    : null;
+  const owner =
+    user?.id && user.id !== "super"
+      ? await db.query.users.findFirst({ where: eq(users.id, user.id) })
+      : null;
+
+  const payments = await db.query.paymentEvents.findMany({
+    where: eq(paymentEvents.orgId, orgId),
+    orderBy: [desc(paymentEvents.createdAt)],
+    limit: 50,
+  });
 
   return (
     <main className="max-w-3xl mx-auto px-4 md:px-8 py-8 space-y-6">
@@ -41,7 +47,7 @@ export default async function AccountPage({
         <p className="font-mono text-xs uppercase text-gray-500 mb-1">Account</p>
         <h1 className="text-3xl font-bold font-mono uppercase">Profile &amp; billing</h1>
         <p className="text-gray-600 mt-2 text-sm">
-          Manage your plan, connect Stripe for rewards, and keep your org details tidy.
+          Your account details, Friction Bounty subscription, invoices, and Stripe Connect for rewards.
         </p>
       </header>
 
@@ -49,7 +55,7 @@ export default async function AccountPage({
         <Banner tone="good">Stripe connected. You can issue rewards from any submission.</Banner>
       )}
       {params.connect === "pending" && (
-        <Banner tone="warn">Stripe setup started — finish the remaining steps if rewards still fail.</Banner>
+        <Banner tone="warn">Stripe setup started — finish remaining steps if rewards still fail.</Banner>
       )}
       {params.connect === "refresh" && (
         <Banner tone="warn">Session expired — click Connect again to resume.</Banner>
@@ -66,20 +72,21 @@ export default async function AccountPage({
           <Item label="Email" value={owner?.email || user?.email || "—"} />
           <Item label="Organization" value={org.name} />
           <Item label="Website" value={org.websiteUrl || "Not set"} />
+          <Item label="Member since" value={owner ? new Date(owner.createdAt).toLocaleDateString() : "—"} />
+          <Item label="Org ID" value={org.id.slice(0, 8) + "…"} />
         </dl>
         <Link href="/dashboard/settings" className="brutal-btn text-sm inline-block">
           Edit org &amp; widget settings →
         </Link>
       </section>
 
-      {/* Billing */}
+      {/* Billing plan */}
       <section className="brutal-box p-6 space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="font-mono font-bold uppercase">Plan &amp; billing</h2>
             <p className="text-sm text-gray-600 mt-1">
-              You pay Friction Bounty for the product. Bounty rewards still come from{" "}
-              <em>your</em> Stripe — we never take a cut.
+              What you pay <em>us</em> for Friction Bounty. Separate from bounty rewards on your Stripe.
             </p>
           </div>
           <span className={`brutal-badge ${isPro ? "bg-green-500 text-white" : "bg-yellow-300"}`}>
@@ -96,15 +103,17 @@ export default async function AccountPage({
             </p>
           </div>
           <div className="brutal-box-sm p-3 bg-gray-50">
-            <p className="font-mono text-xs uppercase text-gray-500 mb-1">Status</p>
-            <p className="font-bold font-mono text-lg capitalize">{org.billingStatus === "none" ? "—" : org.billingStatus}</p>
-            <p className="text-xs text-gray-600 mt-1">Cancel anytime from the billing portal</p>
+            <p className="font-mono text-xs uppercase text-gray-500 mb-1">Subscription status</p>
+            <p className="font-bold font-mono text-lg capitalize">
+              {org.billingStatus === "none" ? "—" : org.billingStatus}
+            </p>
+            <p className="text-xs text-gray-600 mt-1 break-all">
+              {org.billingCustomerId ? `Customer ${org.billingCustomerId}` : "No Stripe customer yet"}
+            </p>
           </div>
         </div>
 
-        {isPro ? (
-          <ManageBillingButton />
-        ) : (
+        {isPro ? <ManageBillingButton /> : (
           <div className="space-y-2">
             <ul className="text-sm space-y-1 text-gray-700">
               <li>→ Unlimited reports</li>
@@ -116,15 +125,46 @@ export default async function AccountPage({
         )}
       </section>
 
-      {/* Payouts / Connect */}
+      {/* Payment history */}
+      <section className="brutal-box p-6 space-y-3">
+        <h2 className="font-mono font-bold uppercase">Billing history</h2>
+        <p className="text-xs text-gray-500">
+          Only Friction Bounty charges (app-tagged). Other products on the same Stripe account never appear here.
+        </p>
+        {payments.length === 0 ? (
+          <p className="text-sm text-gray-600 brutal-box-sm p-3 bg-gray-50">No payments yet.</p>
+        ) : (
+          <ul className="divide-y-2 divide-black border-2 border-black">
+            {payments.map((p) => (
+              <li key={p.id} className="p-3 flex flex-wrap justify-between gap-2 text-sm bg-white">
+                <div>
+                  <p className="font-mono text-xs text-gray-500">{new Date(p.createdAt).toLocaleString()}</p>
+                  <p className="font-medium">{p.description || p.type}</p>
+                  <p className="font-mono text-[10px] text-gray-400">{p.type}</p>
+                </div>
+                <div className="text-right font-mono text-sm">
+                  <p>{p.amountCents != null ? `$${(p.amountCents / 100).toFixed(2)}` : "—"}</p>
+                  <p className="text-xs text-gray-500">{p.status}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+        {isPro && (
+          <p className="text-xs text-gray-500">
+            Need a PDF invoice? Use <strong>Manage billing</strong> for the Stripe customer portal.
+          </p>
+        )}
+      </section>
+
+      {/* Connect */}
       <section className="brutal-box p-6 space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="font-mono font-bold uppercase">Reward payouts (Stripe)</h2>
+            <h2 className="font-mono font-bold uppercase">Reward payouts (Stripe Connect)</h2>
             <p className="text-sm text-gray-600 mt-1 max-w-xl">
-              Connect your Stripe account with one click. We never ask for API keys —
-              Stripe hosts the whole flow. Rewards (credits &amp; promo codes) are issued
-              on <strong>your</strong> account.
+              Connect your Stripe account with one click. We never ask for API keys. Rewards issue on{" "}
+              <strong>your</strong> account as credits or promo codes.
             </p>
           </div>
           <span className={`brutal-badge ${stripeReady ? "bg-green-500 text-white" : "bg-gray-200"}`}>
@@ -134,14 +174,10 @@ export default async function AccountPage({
 
         {!platformOk && (
           <Banner tone="warn">
-            Platform Stripe is not configured yet. Email hi@frictionbounty.app and we&rsquo;ll finish setup.
+            Platform Stripe is not configured yet. Email hi@frictionbounty.app.
           </Banner>
         )}
-
-        {platformOk && (
-          <ConnectStripeButton connected={stripeReady} pending={connectPending} />
-        )}
-
+        {platformOk && <ConnectStripeButton connected={stripeReady} pending={connectPending} />}
         {org.stripeAccountId && (
           <p className="font-mono text-xs text-gray-500">
             Connected account: <code className="bg-gray-100 px-1">{org.stripeAccountId}</code>
@@ -167,7 +203,5 @@ function Item({ label, value }: { label: string; value: string }) {
 
 function Banner({ tone, children }: { tone: "good" | "warn"; children: React.ReactNode }) {
   const cls = tone === "good" ? "bg-green-100" : "bg-yellow-100";
-  return (
-    <div className={`brutal-box-sm ${cls} px-4 py-2 font-mono text-sm`}>{children}</div>
-  );
+  return <div className={`brutal-box-sm ${cls} px-4 py-2 font-mono text-sm`}>{children}</div>;
 }

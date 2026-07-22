@@ -22,6 +22,7 @@ export default function Home() {
             <a href="#how">How</a>
             <a href="#who">Who</a>
             <a href="#faq">FAQ</a>
+            <Link href="/blog">Blog</Link>
             <Link href="/pricing">Pricing</Link>
             <Link href="/login" className="lp-nav-login">
               Log in
@@ -387,6 +388,7 @@ export default function Home() {
           </div>
           <div className="lp-footer-links">
             <a href="#faq">FAQ</a>
+            <Link href="/blog">Blog</Link>
             <Link href="/pricing">Pricing</Link>
             <Link href="/terms">Terms</Link>
             <Link href="/privacy">Privacy</Link>
