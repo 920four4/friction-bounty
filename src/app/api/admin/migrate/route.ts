@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Client } from "pg";
 import { timingSafeEqual } from "node:crypto";
 import { migrations } from "@/db/migrations";
-import { getSession } from "@/lib/auth";
+import { getCurrentUser, getSession, isAllowedSuperAdminEmail } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -10,13 +10,11 @@ export const maxDuration = 60;
 // Hard-gated migration runner.
 //
 // Authorization options (any of):
-//   - an active super-admin session (cookie), OR
+//   - super-admin session for allowlisted email (z@920four.com) only, OR
 //   - { password: SUPER_ADMIN_PASSWORD } in the JSON body — only when
 //     MIGRATE_ENABLED=1 in the environment.
 //
-// In production you should leave MIGRATE_ENABLED unset and only flip it
-// briefly when you actually need to run a migration. The session path
-// remains open so a real super-admin can always migrate from the UI.
+// In production leave MIGRATE_ENABLED unset; use the allowlisted session path.
 
 function constantTimeStringEqual(a: string, b: string): boolean {
   const aBuf = Buffer.from(a);
@@ -30,7 +28,11 @@ function constantTimeStringEqual(a: string, b: string): boolean {
 
 export async function POST(request: NextRequest) {
   const session = await getSession();
-  let authorized = session?.role === "super_admin";
+  const user = await getCurrentUser();
+  let authorized =
+    session?.role === "super_admin" &&
+    !!user &&
+    isAllowedSuperAdminEmail(user.email);
 
   let body: { password?: string } = {};
   try { body = await request.json(); } catch { /* allow empty body when session-authed */ }
