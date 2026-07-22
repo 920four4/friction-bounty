@@ -41,6 +41,12 @@ export const organizations = pgTable("organizations", {
   widgetPrimaryColor: varchar("widget_primary_color", { length: 7 }).notNull().default("#FFE100"),
   widgetPosition: varchar("widget_position", { length: 20 }).notNull().default("bottom-right"),
   widgetWelcomeMessage: text("widget_welcome_message").notNull().default("Found an issue? Report it and earn rewards!"),
+  // brutal | soft | pill — how the launcher/panel edges look on the merchant site
+  widgetStyle: varchar("widget_style", { length: 20 }).notNull().default("brutal"),
+  // Empty = icon-only launcher; set e.g. "Report a bug" for a labeled pill
+  widgetButtonLabel: varchar("widget_button_label", { length: 40 }).notNull().default(""),
+  // Pixels from bottom — raise to sit above Intercom/Zendesk/etc.
+  widgetOffsetBottom: integer("widget_offset_bottom").notNull().default(20),
 
   // Lifecycle
   isActive: boolean("is_active").notNull().default(true),

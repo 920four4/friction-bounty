@@ -30,5 +30,8 @@ export async function GET(request: NextRequest) {
     welcomeMessage: org.widgetWelcomeMessage,
     bountyAmount: org.defaultBountyAmount,
     currency: org.bountyCurrency,
+    style: org.widgetStyle || "brutal",
+    buttonLabel: org.widgetButtonLabel || "",
+    offsetBottom: org.widgetOffsetBottom ?? 20,
   }));
 }

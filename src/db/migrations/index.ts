@@ -250,10 +250,20 @@ CREATE INDEX IF NOT EXISTS blog_posts_published_idx ON blog_posts(published_at);
 COMMIT;
 `;
 
+// Widget brand/style controls for the live preview studio.
+export const migration_0006_widget_style = /* sql */ `
+BEGIN;
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS widget_style VARCHAR(20) NOT NULL DEFAULT 'brutal';
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS widget_button_label VARCHAR(40) NOT NULL DEFAULT '';
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS widget_offset_bottom INTEGER NOT NULL DEFAULT 20;
+COMMIT;
+`;
+
 export const migrations: Array<{ name: string; sql: string }> = [
   { name: "0001_multitenant", sql: migration_0001_multitenant },
   { name: "0002_monthly_budget", sql: migration_0002_monthly_budget },
   { name: "0003_submissions_columns", sql: migration_0003_submissions_columns },
   { name: "0004_connect_billing", sql: migration_0004_connect_billing },
   { name: "0005_blog_payments", sql: migration_0005_blog_payments },
+  { name: "0006_widget_style", sql: migration_0006_widget_style },
 ];

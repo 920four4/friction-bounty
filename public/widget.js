@@ -50,6 +50,9 @@
     welcomeMessage: 'Found an issue? Report it and earn rewards!',
     bountyAmount: '10',
     orgName: '',
+    style: 'brutal',       // brutal | soft | pill
+    buttonLabel: '',       // empty = icon-only
+    offsetBottom: 20,      // px from bottom (raise above chat widgets)
   };
 
   var STROKE_COLOR = '#FF3300';
@@ -69,64 +72,139 @@
 
   var widgetEl = null;
 
+  function styleTokens() {
+    var s = config.style || 'brutal';
+    if (s === 'soft') {
+      return {
+        radius: '14px',
+        radiusSm: '10px',
+        border: '1px solid rgba(0,0,0,.12)',
+        shadow: '0 8px 28px rgba(0,0,0,.18)',
+        shadowHover: '0 12px 32px rgba(0,0,0,.22)',
+        fontHeader: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif',
+        headerTransform: 'none',
+        letter: '0',
+        submitShadow: '0 4px 14px rgba(0,0,0,.15)',
+      };
+    }
+    if (s === 'pill') {
+      return {
+        radius: '999px',
+        radiusSm: '12px',
+        border: 'none',
+        shadow: '0 6px 20px rgba(0,0,0,.2)',
+        shadowHover: '0 10px 28px rgba(0,0,0,.28)',
+        fontHeader: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif',
+        headerTransform: 'none',
+        letter: '0',
+        submitShadow: '0 4px 14px rgba(0,0,0,.15)',
+      };
+    }
+    // brutal (default)
+    return {
+      radius: '0',
+      radiusSm: '0',
+      border: '2px solid #000',
+      shadow: '4px 4px 0 0 #000',
+      shadowHover: '6px 6px 0 0 #000',
+      fontHeader: '"IBM Plex Mono",ui-monospace,monospace',
+      headerTransform: 'uppercase',
+      letter: '.5px',
+      submitShadow: '4px 4px 0 0 #000',
+    };
+  }
+
   function injectStyles() {
+    var t = styleTokens();
+    var side = config.position === 'bottom-left' ? 'left:20px;' : 'right:20px;';
+    var bottom = (parseInt(config.offsetBottom, 10) || 20);
+    var hasLabel = !!(config.buttonLabel && String(config.buttonLabel).trim());
+    var triggerSize = hasLabel
+      ? 'height:48px;padding:0 16px;width:auto;min-width:56px;gap:8px;'
+      : 'width:56px;height:56px;';
+    var panelBottom = bottom + (hasLabel ? 60 : 68);
+    var color = config.primaryColor || '#FFE100';
+
     var styles = ''
       + '.fb-widget{position:fixed;z-index:999999;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}'
-      + '.fb-widget-trigger{position:fixed;' + (config.position === 'bottom-left' ? 'left:20px;' : 'right:20px;') + 'bottom:20px;width:56px;height:56px;background:' + config.primaryColor + ';border:2px solid #000;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:4px 4px 0 0 #000;transition:all .15s ease;}'
-      + '.fb-widget-trigger:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 0 #000;}'
-      + '.fb-widget-trigger:active{transform:translate(2px,2px);box-shadow:2px 2px 0 0 #000;}'
-      + '.fb-widget-trigger svg{width:24px;height:24px;}'
-      + '.fb-widget-panel{position:fixed;' + (config.position === 'bottom-left' ? 'left:20px;' : 'right:20px;') + 'bottom:88px;width:380px;max-width:calc(100vw - 40px);max-height:calc(100vh - 120px);background:#fff;border:2px solid #000;box-shadow:4px 4px 0 0 #000;display:none;flex-direction:column;overflow:hidden;}'
+      + '.fb-widget-trigger{position:fixed;' + side + 'bottom:' + bottom + 'px;' + triggerSize
+      + 'background:' + color + ';border:' + t.border + ';border-radius:' + t.radius
+      + ';cursor:pointer;display:flex;align-items:center;justify-content:center;'
+      + 'box-shadow:' + t.shadow + ';transition:all .15s ease;color:#000;font-weight:600;font-size:13px;}'
+      + '.fb-widget-trigger:hover{transform:translateY(-2px);box-shadow:' + t.shadowHover + ';}'
+      + '.fb-widget-trigger svg{width:22px;height:22px;flex-shrink:0;}'
+      + '.fb-widget-trigger-label{white-space:nowrap;max-width:140px;overflow:hidden;text-overflow:ellipsis;}'
+      + '.fb-widget-panel{position:fixed;' + side + 'bottom:' + panelBottom + 'px;width:380px;max-width:calc(100vw - 40px);'
+      + 'max-height:calc(100vh - 120px);background:#fff;border:' + t.border + ';border-radius:' + t.radiusSm
+      + ';box-shadow:' + t.shadow + ';display:none;flex-direction:column;overflow:hidden;}'
       + '.fb-widget-panel.open{display:flex;}'
       + '.fb-widget-panel.editor{width:560px;}'
-      + '.fb-widget-header{background:' + config.primaryColor + ';border-bottom:2px solid #000;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}'
-      + '.fb-widget-header h3{margin:0;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-family:"IBM Plex Mono",monospace;}'
-      + '.fb-widget-close{width:28px;height:28px;background:#fff;border:2px solid #000;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;}'
+      + '.fb-widget-header{background:' + color + ';border-bottom:' + t.border + ';padding:12px 16px;'
+      + 'display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}'
+      + '.fb-widget-header h3{margin:0;font-size:14px;font-weight:600;text-transform:' + t.headerTransform
+      + ';letter-spacing:' + t.letter + ';font-family:' + t.fontHeader + ';}'
+      + '.fb-widget-close{width:28px;height:28px;background:#fff;border:' + t.border + ';border-radius:' + t.radiusSm
+      + ';cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;}'
       + '.fb-widget-close:hover{background:#000;color:#fff;}'
       + '.fb-widget-content{padding:16px;overflow-y:auto;flex:1;}'
       + '.fb-widget-welcome{font-size:14px;color:#525252;margin-bottom:14px;line-height:1.5;}'
-      + '.fb-widget-bounty{background:' + config.primaryColor + ';border:2px solid #000;padding:8px 12px;font-size:12px;font-weight:600;text-transform:uppercase;display:inline-block;margin-bottom:14px;font-family:"IBM Plex Mono",monospace;}'
+      + '.fb-widget-bounty{background:' + color + ';border:' + t.border + ';border-radius:' + t.radiusSm
+      + ';padding:8px 12px;font-size:12px;font-weight:600;text-transform:' + t.headerTransform
+      + ';display:inline-block;margin-bottom:14px;font-family:' + t.fontHeader + ';}'
       + '.fb-widget-form-group{margin-bottom:12px;}'
-      + '.fb-widget-label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;font-family:"IBM Plex Mono",monospace;color:#525252;}'
-      + '.fb-widget-input,.fb-widget-textarea,.fb-widget-select{width:100%;padding:8px 10px;border:2px solid #000;background:#fff;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;}'
-      + '.fb-widget-input:focus,.fb-widget-textarea:focus,.fb-widget-select:focus{background:' + config.primaryColor + ';}'
+      + '.fb-widget-label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;'
+      + 'margin-bottom:4px;font-family:"IBM Plex Mono",monospace;color:#525252;}'
+      + '.fb-widget-input,.fb-widget-textarea,.fb-widget-select{width:100%;padding:8px 10px;border:' + t.border
+      + ';border-radius:' + t.radiusSm + ';background:#fff;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;}'
+      + '.fb-widget-input:focus,.fb-widget-textarea:focus,.fb-widget-select:focus{background:' + color + ';}'
       + '.fb-widget-textarea{min-height:70px;resize:vertical;}'
-      + '.fb-widget-capture-cta{width:100%;border:2px dashed #000;padding:18px;text-align:center;background:#fafafa;cursor:pointer;font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600;text-transform:uppercase;margin-bottom:12px;transition:background .15s ease;}'
-      + '.fb-widget-capture-cta:hover{background:' + config.primaryColor + ';}'
+      + '.fb-widget-capture-cta{width:100%;border:2px dashed #999;border-radius:' + t.radiusSm
+      + ';padding:18px;text-align:center;background:#fafafa;cursor:pointer;font-family:"IBM Plex Mono",monospace;'
+      + 'font-size:13px;font-weight:600;text-transform:uppercase;margin-bottom:12px;transition:background .15s ease;}'
+      + '.fb-widget-capture-cta:hover{background:' + color + ';}'
       + '.fb-widget-capture-cta:disabled{opacity:.5;cursor:not-allowed;}'
-      + '.fb-widget-thumb-container{position:relative;border:2px solid #000;margin-bottom:12px;background:#f5f5f5;}'
+      + '.fb-widget-thumb-container{position:relative;border:' + t.border + ';border-radius:' + t.radiusSm
+      + ';margin-bottom:12px;background:#f5f5f5;overflow:hidden;}'
       + '.fb-widget-thumb{display:block;width:100%;height:auto;max-height:200px;object-fit:contain;}'
       + '.fb-widget-thumb-actions{position:absolute;top:6px;right:6px;display:flex;gap:6px;}'
-      + '.fb-widget-thumb-action{background:#fff;border:2px solid #000;padding:4px 8px;font-size:11px;font-family:"IBM Plex Mono",monospace;cursor:pointer;text-transform:uppercase;font-weight:600;}'
-      + '.fb-widget-thumb-action:hover{background:' + config.primaryColor + ';}'
-      + '.fb-widget-submit{width:100%;background:#000;color:#fff;border:2px solid #000;padding:12px;font-size:14px;font-weight:600;text-transform:uppercase;cursor:pointer;font-family:"IBM Plex Mono",monospace;box-shadow:4px 4px 0 0 #000;transition:all .15s ease;}'
-      + '.fb-widget-submit:hover:not(:disabled){background:' + config.primaryColor + ';color:#000;transform:translate(-2px,-2px);box-shadow:6px 6px 0 0 #000;}'
+      + '.fb-widget-thumb-action{background:#fff;border:' + t.border + ';border-radius:' + t.radiusSm
+      + ';padding:4px 8px;font-size:11px;font-family:"IBM Plex Mono",monospace;cursor:pointer;text-transform:uppercase;font-weight:600;}'
+      + '.fb-widget-thumb-action:hover{background:' + color + ';}'
+      + '.fb-widget-submit{width:100%;background:#000;color:#fff;border:' + t.border + ';border-radius:' + t.radiusSm
+      + ';padding:12px;font-size:14px;font-weight:600;text-transform:' + t.headerTransform + ';cursor:pointer;'
+      + 'font-family:' + t.fontHeader + ';box-shadow:' + t.submitShadow + ';transition:all .15s ease;}'
+      + '.fb-widget-submit:hover:not(:disabled){background:' + color + ';color:#000;}'
       + '.fb-widget-submit:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;}'
       + '.fb-widget-success{text-align:center;padding:24px 16px;}'
-      + '.fb-widget-success h4{margin:0 0 12px;font-size:18px;text-transform:uppercase;font-family:"IBM Plex Mono",monospace;}'
+      + '.fb-widget-success h4{margin:0 0 12px;font-size:18px;text-transform:' + t.headerTransform
+      + ';font-family:' + t.fontHeader + ';}'
       + '.fb-widget-success p{margin:0;font-size:14px;color:#525252;line-height:1.5;}'
-      + '.fb-widget-error{background:#ff3300;color:#fff;padding:8px 12px;font-size:12px;margin-bottom:12px;border:2px solid #000;}'
+      + '.fb-widget-error{background:#ff3300;color:#fff;padding:8px 12px;font-size:12px;margin-bottom:12px;border:' + t.border
+      + ';border-radius:' + t.radiusSm + ';}'
       + '.fb-widget-loading{display:inline-block;width:16px;height:16px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:fb-spin 1s linear infinite;vertical-align:middle;margin-right:8px;}'
       + '@keyframes fb-spin{to{transform:rotate(360deg);}}'
-      // editor styles
       + '.fb-editor{display:flex;flex-direction:column;height:100%;}'
-      + '.fb-editor-toolbar{display:flex;gap:6px;padding:8px;border-bottom:2px solid #000;background:#fafafa;flex-wrap:wrap;align-items:center;}'
-      + '.fb-tool-btn{border:2px solid #000;background:#fff;padding:6px 10px;font-size:12px;font-family:"IBM Plex Mono",monospace;font-weight:600;cursor:pointer;text-transform:uppercase;display:inline-flex;align-items:center;gap:4px;}'
-      + '.fb-tool-btn:hover{background:' + config.primaryColor + ';}'
+      + '.fb-editor-toolbar{display:flex;gap:6px;padding:8px;border-bottom:' + t.border + ';background:#fafafa;flex-wrap:wrap;align-items:center;}'
+      + '.fb-tool-btn{border:' + t.border + ';border-radius:' + t.radiusSm + ';background:#fff;padding:6px 10px;font-size:12px;font-family:"IBM Plex Mono",monospace;font-weight:600;cursor:pointer;text-transform:uppercase;display:inline-flex;align-items:center;gap:4px;}'
+      + '.fb-tool-btn:hover{background:' + color + ';}'
       + '.fb-tool-btn.active{background:#000;color:#fff;}'
       + '.fb-tool-spacer{flex:1;}'
       + '.fb-canvas-wrap{position:relative;background:#222;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:1;min-height:280px;max-height:60vh;}'
       + '.fb-canvas-wrap canvas{display:block;max-width:100%;max-height:100%;cursor:crosshair;touch-action:none;}'
-      + '.fb-editor-footer{padding:10px;border-top:2px solid #000;display:flex;gap:8px;background:#fff;}'
-      + '.fb-editor-footer button{flex:1;border:2px solid #000;padding:10px;font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;text-transform:uppercase;cursor:pointer;}'
+      + '.fb-editor-footer{padding:10px;border-top:' + t.border + ';display:flex;gap:8px;background:#fff;}'
+      + '.fb-editor-footer button{flex:1;border:' + t.border + ';border-radius:' + t.radiusSm
+      + ';padding:10px;font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;text-transform:uppercase;cursor:pointer;}'
       + '.fb-editor-footer .fb-secondary{background:#fff;}'
       + '.fb-editor-footer .fb-secondary:hover{background:#eee;}'
       + '.fb-editor-footer .fb-primary{background:#000;color:#fff;}'
-      + '.fb-editor-footer .fb-primary:hover{background:' + config.primaryColor + ';color:#000;}'
+      + '.fb-editor-footer .fb-primary:hover{background:' + color + ';color:#000;}'
       + '@media (max-width:600px){.fb-widget-panel.editor{width:calc(100vw - 24px);}}'
       + '@media (max-width:400px){.fb-widget-panel{width:calc(100vw - 24px);left:12px !important;right:12px !important;}}';
     var el = document.createElement('style');
+    el.id = 'fb-widget-styles';
     el.textContent = styles;
+    var prev = document.getElementById('fb-widget-styles');
+    if (prev) prev.remove();
     document.head.appendChild(el);
   }
 
@@ -280,11 +358,17 @@
   function buildWidget() {
     var el = document.createElement('div');
     el.className = 'fb-widget';
+    var label = (config.buttonLabel || '').trim();
+    var labelHtml = label
+      ? '<span class="fb-widget-trigger-label">' + escapeHtml(label) + '</span>'
+      : '';
+    var aria = label || 'Report an issue';
     el.innerHTML = ''
-      + '<button class="fb-widget-trigger" aria-label="Report an issue">'
-      +   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+      + '<button class="fb-widget-trigger" aria-label="' + escapeHtml(aria) + '">'
+      +   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
       +     '<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>'
       +   '</svg>'
+      +   labelHtml
       + '</button>'
       + '<div class="fb-widget-panel" role="dialog" aria-label="Submit bug report">'
       +   '<div class="fb-widget-header"><h3 class="fb-widget-title">Report Issue</h3><button class="fb-widget-close" aria-label="Close">×</button></div>'
@@ -623,6 +707,11 @@
           if (remote.welcomeMessage) config.welcomeMessage = remote.welcomeMessage;
           if (remote.bountyAmount) config.bountyAmount = remote.bountyAmount;
           if (remote.orgName) config.orgName = remote.orgName;
+          if (remote.style) config.style = remote.style;
+          if (typeof remote.buttonLabel === 'string') config.buttonLabel = remote.buttonLabel;
+          if (remote.offsetBottom != null && !isNaN(Number(remote.offsetBottom))) {
+            config.offsetBottom = Number(remote.offsetBottom);
+          }
         }
       })
       .catch(function() { /* fall through to defaults */ })

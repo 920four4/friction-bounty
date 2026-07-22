@@ -101,8 +101,9 @@ export default async function GettingStartedPage() {
           </div>
         </details>
         <p className="text-xs font-mono text-gray-500">
-          API key is already in the snippet — no extra config. Change color &amp; copy anytime in{" "}
-          <Link href="/dashboard/settings" className="underline">Settings</Link>.
+          API key is already in the snippet. Open{" "}
+          <Link href="/dashboard/settings" className="underline font-bold">Settings → Widget studio</Link>
+          {" "}for a live preview of the button + form (color, style, corner, chat-widget offset).
         </p>
       </section>
 

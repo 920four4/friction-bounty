@@ -8,6 +8,7 @@ import { requireOrgOwner } from "@/lib/auth";
 import { widgetBaseUrl } from "@/lib/url";
 import { orgCanIssueRewards } from "@/lib/stripe";
 import { CopyButton, CopyField } from "@/components/copy-button";
+import { WidgetStudio } from "@/components/widget-studio";
 
 export const dynamic = "force-dynamic";
 
@@ -19,9 +20,20 @@ async function saveSettings(formData: FormData) {
   const defaultBountyAmount = (formData.get("defaultBountyAmount") as string || "10.00").trim();
   const monthlyBudgetRaw = (formData.get("monthlyBudget") as string || "").trim();
   const monthlyBudget = monthlyBudgetRaw === "" ? null : monthlyBudgetRaw;
-  const widgetPrimaryColor = (formData.get("widgetPrimaryColor") as string || "#FFE100").trim();
-  const widgetPosition = (formData.get("widgetPosition") as string || "bottom-right").trim();
+  let widgetPrimaryColor = (formData.get("widgetPrimaryColor") as string || "#FFE100").trim();
+  if (!widgetPrimaryColor.startsWith("#")) widgetPrimaryColor = `#${widgetPrimaryColor}`;
+  if (!/^#[0-9A-Fa-f]{6}$/.test(widgetPrimaryColor)) widgetPrimaryColor = "#FFE100";
+
+  const widgetPositionRaw = (formData.get("widgetPosition") as string || "bottom-right").trim();
+  const widgetPosition = widgetPositionRaw === "bottom-left" ? "bottom-left" : "bottom-right";
   const widgetWelcomeMessage = (formData.get("widgetWelcomeMessage") as string || "").trim();
+  const styleRaw = (formData.get("widgetStyle") as string || "brutal").trim();
+  const widgetStyle = ["brutal", "soft", "pill"].includes(styleRaw) ? styleRaw : "brutal";
+  const widgetButtonLabel = (formData.get("widgetButtonLabel") as string || "").trim().slice(0, 40);
+  let widgetOffsetBottom = parseInt(String(formData.get("widgetOffsetBottom") || "20"), 10);
+  if (isNaN(widgetOffsetBottom)) widgetOffsetBottom = 20;
+  widgetOffsetBottom = Math.min(120, Math.max(8, widgetOffsetBottom));
+
   const websiteUrl = (formData.get("websiteUrl") as string || "").trim();
   const orgName = (formData.get("orgName") as string || "").trim();
   const notificationEmail = (formData.get("notificationEmail") as string || "").trim();
@@ -35,6 +47,9 @@ async function saveSettings(formData: FormData) {
       widgetPrimaryColor,
       widgetPosition,
       widgetWelcomeMessage: widgetWelcomeMessage || undefined,
+      widgetStyle,
+      widgetButtonLabel,
+      widgetOffsetBottom,
       websiteUrl: websiteUrl || null,
       notificationEmail: notificationEmail || null,
       notifyOnSubmission,
@@ -43,6 +58,7 @@ async function saveSettings(formData: FormData) {
     .where(eq(organizations.id, orgId));
 
   revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/getting-started");
   redirect("/dashboard/settings?saved=1");
 }
 
@@ -58,49 +74,81 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   const stripeReady = orgCanIssueRewards(org);
 
   return (
-    <main className="max-w-3xl mx-auto px-4 md:px-8 py-8 space-y-6">
+    <main className="max-w-6xl mx-auto px-4 md:px-8 py-8 space-y-6">
       <div>
         <p className="font-mono text-xs uppercase text-gray-500 mb-1">Settings</p>
         <h1 className="text-3xl font-bold font-mono uppercase">Widget &amp; org</h1>
         <p className="text-sm text-gray-600 mt-1">
-          For Stripe payouts and plan billing, go to{" "}
+          Design what customers see on your site, then install once. Billing &amp; Stripe →{" "}
           <Link href="/dashboard/account" className="underline">Account</Link>.
         </p>
       </div>
 
       {saved && (
-        <div className="brutal-box-sm bg-green-100 px-4 py-2 font-mono text-sm">Settings saved.</div>
+        <div className="brutal-box-sm bg-green-100 px-4 py-2 font-mono text-sm">
+          Saved — your live widget will pick this up on the next page load (no reinstall needed).
+        </div>
       )}
 
-      {/* Install */}
-      <section className="brutal-box p-6 space-y-3">
-        <h2 className="font-mono font-bold uppercase">Install snippet</h2>
-        <CopyField value={widgetSrc} />
-        <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 font-mono">
-          <span>API key:</span>
-          <span className="bg-gray-100 px-2 py-1 break-all">{org.apiKey}</span>
-          <CopyButton value={org.apiKey} label="Copy key" />
-        </div>
-      </section>
-
-      {/* Stripe status — no keys */}
-      <section className="brutal-box p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="font-mono font-bold uppercase">Reward payouts</h2>
-            <p className="text-sm text-gray-600 mt-1">
-              {stripeReady
-                ? "Stripe is connected. Rewards issue on your account."
-                : "Connect Stripe to issue credits & promo codes — no API keys to paste."}
+      <form action={saveSettings} className="space-y-6">
+        {/* Widget studio — primary experience */}
+        <section className="brutal-box p-5 md:p-6 bg-[#faf9f5]">
+          <WidgetStudio
+            initial={{
+              primaryColor: org.widgetPrimaryColor || "#FFE100",
+              position: (org.widgetPosition === "bottom-left" ? "bottom-left" : "bottom-right"),
+              welcomeMessage: org.widgetWelcomeMessage,
+              bountyAmount: org.defaultBountyAmount?.toString() || "10.00",
+              style: (["brutal", "soft", "pill"].includes(org.widgetStyle || "")
+                ? org.widgetStyle
+                : "brutal") as "brutal" | "soft" | "pill",
+              buttonLabel: org.widgetButtonLabel || "",
+              offsetBottom: org.widgetOffsetBottom ?? 20,
+              orgName: org.websiteUrl || org.name,
+            }}
+          />
+          <div className="mt-5 flex flex-wrap items-center gap-3 border-t-2 border-black pt-4">
+            <button type="submit" className="brutal-btn-black">
+              Save widget look →
+            </button>
+            <p className="font-mono text-xs text-gray-500">
+              Changes apply to every site using your snippet.
             </p>
           </div>
-          <Link href="/dashboard/account" className="brutal-btn-black text-sm">
-            {stripeReady ? "Manage in Account →" : "Connect Stripe →"}
-          </Link>
-        </div>
-      </section>
+        </section>
 
-      <form action={saveSettings} className="space-y-6">
+        {/* Install */}
+        <section className="brutal-box p-6 space-y-3">
+          <h2 className="font-mono font-bold uppercase">Install on your site</h2>
+          <p className="text-sm text-gray-600">
+            Paste once before <code className="bg-gray-100 px-1">&lt;/body&gt;</code>. Appearance comes from this
+            page — you do not edit the script when you change color or style.
+          </p>
+          <CopyField value={widgetSrc} />
+          <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 font-mono">
+            <span>API key:</span>
+            <span className="bg-gray-100 px-2 py-1 break-all">{org.apiKey}</span>
+            <CopyButton value={org.apiKey} label="Copy key" />
+          </div>
+        </section>
+
+        {/* Stripe */}
+        <section className="brutal-box p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="font-mono font-bold uppercase">Reward payouts</h2>
+              <p className="text-sm text-gray-600 mt-1">
+                {stripeReady
+                  ? "Stripe is connected. Rewards issue on your account."
+                  : "Connect Stripe to issue credits & promo codes — no API keys to paste."}
+              </p>
+            </div>
+            <Link href="/dashboard/account" className="brutal-btn-black text-sm">
+              {stripeReady ? "Manage in Account →" : "Connect Stripe →"}
+            </Link>
+          </div>
+        </section>
+
         <section className="brutal-box p-6">
           <h2 className="font-mono font-bold uppercase mb-4">Organization</h2>
           <div className="grid md:grid-cols-2 gap-4">
@@ -110,24 +158,24 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         </section>
 
         <section className="brutal-box p-6">
-          <h2 className="font-mono font-bold uppercase mb-4">Bounty &amp; budget</h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            <Field label="Default amount (USD)" name="defaultBountyAmount" type="number" step="0.01" defaultValue={org.defaultBountyAmount.toString()} />
-            <div>
-              <label className="brutal-label">Monthly budget (USD)</label>
-              <input
-                type="number"
-                name="monthlyBudget"
-                step="0.01"
-                min="0"
-                defaultValue={org.monthlyBudget ?? ""}
-                placeholder="No limit"
-                className="brutal-input"
-              />
-              <p className="text-xs text-gray-500 mt-1 font-mono">
-                Hard cap per calendar month. Leave blank for unlimited.
-              </p>
-            </div>
+          <h2 className="font-mono font-bold uppercase mb-4">Monthly budget</h2>
+          <p className="text-sm text-gray-600 mb-3">
+            Default bounty amount is set in the widget studio above (what visitors see). Cap total spend here.
+          </p>
+          <div className="max-w-sm">
+            <label className="brutal-label">Monthly budget (USD)</label>
+            <input
+              type="number"
+              name="monthlyBudget"
+              step="0.01"
+              min="0"
+              defaultValue={org.monthlyBudget ?? ""}
+              placeholder="No limit"
+              className="brutal-input"
+            />
+            <p className="text-xs text-gray-500 mt-1 font-mono">
+              Hard cap per calendar month. Leave blank for unlimited.
+            </p>
           </div>
         </section>
 
@@ -155,25 +203,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
           </div>
         </section>
 
-        <section className="brutal-box p-6">
-          <h2 className="font-mono font-bold uppercase mb-4">Widget appearance</h2>
-          <div className="grid md:grid-cols-2 gap-4">
-            <Field label="Primary color" name="widgetPrimaryColor" defaultValue={org.widgetPrimaryColor} placeholder="#FFE100" />
-            <div>
-              <label className="brutal-label">Position</label>
-              <select name="widgetPosition" defaultValue={org.widgetPosition} className="brutal-input">
-                <option value="bottom-right">Bottom right</option>
-                <option value="bottom-left">Bottom left</option>
-              </select>
-            </div>
-            <div className="md:col-span-2">
-              <label className="brutal-label">Welcome message</label>
-              <textarea name="widgetWelcomeMessage" defaultValue={org.widgetWelcomeMessage} rows={2} className="brutal-input" />
-            </div>
-          </div>
-        </section>
-
-        <button type="submit" className="brutal-btn-black">Save settings</button>
+        <button type="submit" className="brutal-btn-black">Save all settings</button>
       </form>
     </main>
   );
